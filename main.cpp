@@ -17,10 +17,10 @@ int main() {
     // cURL initialisieren
     curl = curl_easy_init();
     if (curl) {
-        // Ziel-URL
+        // Ziel-URL von Entsoe
         curl_easy_setopt(curl, CURLOPT_URL, "https://web-api.tp.entsoe.eu/api?documentType=A26&businessType=B08&out_Domain=10YGB----------A&in_Domain=10YBE----------2&periodStart=202308202200&periodEnd=202308212200");
 
-        // HTTP-Methode GET setzen
+        // GET Request setzen
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
 
         // Automatisches Folgen von Weiterleitungen aktivieren
@@ -29,9 +29,12 @@ int main() {
         // Standardprotokoll auf HTTPS setzen
         curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
 
-        // HTTP-Header hinzufügen (z. B. Autorisierung)
+        // HTTP-Header hinzufügen
         struct curl_slist* headers = NULL;
-        headers = curl_slist_append(headers, "Authorization: Bearer YOUR_API_KEY"); // Ersetze YOUR_API_KEY durch deinen API-Schlüssel
+        
+
+        
+        headers = curl_slist_append(headers, "0e2c5458-3e40-4c3a-907d-c344020ebad6");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
         // Callback-Funktion zum Speichern der Antwort setzen
@@ -40,6 +43,7 @@ int main() {
 
         // Anfrage ausführen
         res = curl_easy_perform(curl);
+
 
         // Fehlerbehandlung
         if (res != CURLE_OK) {

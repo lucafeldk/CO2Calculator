@@ -1,9 +1,22 @@
 #include <cpr/cpr.h>
 #include <iostream>
 
+class APIClient{
+    public: 
+    std::string authToken;
+    std::string baseURL;
+    
+
+    
+    
+};
+
+
+
+
 int main() {
     // set url parameters
-    std::string api_key = "0e2c5458-3e40-4c3a-907d-c344020ebad6";
+    std::string api_key = "here token";
     std::string base_url = "https://web-api.tp.entsoe.eu/api";
     std::string document_type = "A75";
     std::string process_type = "A16";

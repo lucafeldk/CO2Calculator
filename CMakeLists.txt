@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_executable(cpr_example main.cpp)
+add_executable(main main.cpp)
 
 if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -28,8 +28,23 @@ if(WIN32) # Install dlls in the same directory as the executable on Windows
 endif()
 
 include(FetchContent)
-FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
-                         GIT_TAG 1.11.0) # The commit hash for 1.11.x. Replace with the latest from: https://github.com/libcpr/cpr/releases
-FetchContent_MakeAvailable(cpr)
 
-target_link_libraries(cpr_example PRIVATE cpr::cpr)
+# Fetch cpr Library for ease api calls
+FetchContent_Declare(
+    cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
+    GIT_TAG 1.11.0
+) # The commit hash for 1.11.x. Replace with the latest from: https://github.com/libcpr/cpr/releases
+FetchContent_MakeAvailable(cpr)
+target_link_libraries(main PRIVATE cpr::cpr)
+
+# Fetch nlohman_json library for parsing jsons
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+)
+FetchContent_MakeAvailable(json)
+target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)
+
+# copys the config.json into build folder for the compilation
+configure_file(${CMAKE_SOURCE_DIR}/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)

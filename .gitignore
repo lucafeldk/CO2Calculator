@@ -31,9 +31,9 @@
 *.out
 *.app
 
-
-
-
 #Folders
 /.vscode/*
 /build/
+
+#Files
+config.json

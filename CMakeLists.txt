@@ -46,5 +46,14 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)
 
+# Fetch pugixml for parsing xml's
+FetchContent_Declare(
+    pugixml
+    GIT_REPOSITORY https://github.com/zeux/pugixml.git
+    GIT_TAG v1.13
+)
+FetchContent_MakeAvailable(pugixml)
+target_link_libraries(main PRIVATE pugixml)
+
 # copys the config.json into build folder for the compilation
 configure_file(${CMAKE_SOURCE_DIR}/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)

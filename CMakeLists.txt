@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(cpr_example)
+project(CO2Calculator)
 
 set(CMAKE_CXX_STANDARD 17)
-
+include_directories(include)
 # Set to C++ 11 if you are using cpr <= 1.9.x
 # More: https://github.com/libcpr/cpr#supported-releases
 # set(CMAKE_CXX_STANDARD 11)
@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_executable(main main.cpp)
+add_executable(main src/main.cpp src/APIClient.cpp src/EntsoeParameterManager.cpp)
 
 if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

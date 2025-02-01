@@ -25,7 +25,7 @@ int main() {
     std::string psr_type = "B02";              // production type e.g. BO2 = Brown Coal
     std::string in_domain = "10Y1001A1001A83F"; //domain code: Biding Zone, Control Area or Country "10Y1001A1001A83F"
     std::string period_start = "202308152215"; // starttime
-    std::string period_end = "202308152230";   // endtime
+    std::string period_end = "202308152300";   // endtime
 
     //configure request url
     std::string param_url ="?documentType=" + document_type +

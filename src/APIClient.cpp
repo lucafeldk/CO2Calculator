@@ -1,13 +1,44 @@
 #include "APIClient.h"
 #include <cpr/cpr.h>
 #include <pugixml.hpp>
+#include <iostream>
 
-void APIClient::get_request(std::string& param, const std::string& api_key){
-    // add api key to the requested parameters
-    paramURL = param + "&securityToken=" + api_key;
+APIClient::APIClient(const std::string& base, const std::string& apiKey){
+    //Initialising the API Client
+    //Configuring examplary API Get Http adress
+    baseURL = base;
+    authToken = "&securityToken=" + apiKey;
+    documentType = "?documentType=A75"; 
+    processType = "&processType=A16";
+    psrType = "&psrType=B01";
+    inDomain = "&in_Domain=10Y1001A1001A83F";
+    periodStart = "&periodStart=202308152200";
+    periodEnd = "&periodEnd=202308152215";
     
-    // api get request via cpr
-    cpr::Response response = cpr::Get(cpr::Url{baseURL + paramURL});
+    create_requestUrl();
+}
+
+void APIClient::create_requestUrl(){
+     // create paramater Url for request
+    requestUrl = baseURL + documentType + processType + psrType + inDomain + periodStart + periodEnd + authToken;
+    //std::cout <<"Requested URL String: "<< requestUrl << std::endl;
+}
+void APIClient::config_request(std::unordered_map<std::string, std::string>& parameter){
+
+    documentType = parameter["docType"];
+    processType = parameter["prcType"];
+    psrType = parameter["psrType"]; 
+    inDomain = parameter["inDomain"]; 
+    periodStart = parameter["prdStart"]; 
+    periodEnd = parameter["prdEnd"];   
+
+    create_requestUrl();
+}
+
+void APIClient::get_request(){
+   
+     // api get request via cpr
+    cpr::Response response = cpr::Get(cpr::Url{requestUrl});
     
     // Error handling for the get request
     if (response.error) {
@@ -57,9 +88,10 @@ void APIClient::xml_parser(cpr::Response& response){
     // loop through the xml <point> messages where the <quantity> (real values) are stored
     for(pugi::xml_node point : period.children("Point")){
         int quantity = point.child("quantity").text().as_int();
-        std::cout << "Quantity: " << quantity << " MAW" << std::endl;
+        std::cout << "Quantity: " << quantity << " MW" << std::endl;
     }
 }
+
 
 
 

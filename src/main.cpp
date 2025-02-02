@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <pugixml.hpp>
 #include "APIClient.h"
-
+#include "EntsoeParameterManager.h"
 
 int main() {
     //std::cout << "Current Working Directory: " << std::filesystem::current_path() << std::endl;
@@ -13,28 +13,28 @@ int main() {
         std::cerr << "Error:config.json file not found!" << std::endl;
         return 1;
     }
-
+    
+    //get the apikey from the config.json
     nlohmann::json config;
     configFile >> config;
+    std::string const apiKey = config["api_key"];
 
-    // set url parameters
-    std::string const api_key = config["api_key"];
-    std::string const base_url = "https://web-api.tp.entsoe.eu/api";
-    std::string document_type = "A75";
-    std::string process_type = "A16";
-    std::string psr_type = "B02";              // production type e.g. BO2 = Brown Coal
-    std::string in_domain = "10Y1001A1001A83F"; //domain code: Biding Zone, Control Area or Country "10Y1001A1001A83F"
-    std::string period_start = "202308152215"; // starttime
-    std::string period_end = "202308152300";   // endtime
+    // Current base URL of the Entsoe API
+    std::string const baseUrl = "https://web-api.tp.entsoe.eu/api";
 
-    //configure request url
-    std::string param_url ="?documentType=" + document_type +
-                      "&processType=" + process_type +
-                      "&in_Domain=" + in_domain +
-                      "&periodStart=" + period_start +
-                      "&periodEnd=" + period_end +
-                      "&psrType=" + psr_type;
+    // create parameter manager object and configure a param set for the request
+    EntsoeParameterManager paramManager;
+    std::unordered_map<std::string, std::string> params = {
+        {"docType", "?documentType=" + paramManager.getDocumentType("Actual generation per type")},
+        {"prcType", "&processType=" + paramManager.getProcessType("Realised")},
+        {"psrType", "&psrType=" + paramManager.getPsrType("Fossil Brown coal")},
+        {"inDomain", "&in_Domain=" + paramManager.getInDomain("Germany")},
+        {"prdStart", "&periodStart=202308152200"},
+        {"prdEnd", "&periodEnd=202308162200"},
+    };
 
-    APIClient firstClient(base_url);
-    firstClient.get_request(param_url,api_key);
+    // create a first API Client 
+    APIClient firstClient(baseUrl, apiKey);
+    firstClient.config_request(params);
+    firstClient.get_request();
 }

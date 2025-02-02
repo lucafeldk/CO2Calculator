@@ -3,17 +3,27 @@
 
 #include <iostream>
 #include <cpr/cpr.h>
+#include <unordered_map>
 
 class APIClient{
     private:
         std::string authToken;
+        std::string psrType;
+        std::string documentType;
+        std::string processType;
+        std::string inDomain;
+        std::string periodStart;
+        std::string periodEnd;
         std::string baseURL;
-        std::string paramURL;
+        std::string requestUrl;
     
     public:
-        APIClient(const std::string& base) : baseURL(base){};       //Constructor
-        void get_request(std::string&  , const std::string &key);  //API get Request
-        void xml_parser(cpr::Response& response);                              //Data parser for xml
+        APIClient(const std::string& base, const std::string& apiKey);                       //Constructor
+        void config_request(std::unordered_map<std::string,  std::string>& parameter);      //config method to configure the request
+        void create_requestUrl();
+        void get_request();                                                                 //API get Request method
+        void xml_parser(cpr::Response& response);                                           //Data parser for xml
+
 };
 
 #endif

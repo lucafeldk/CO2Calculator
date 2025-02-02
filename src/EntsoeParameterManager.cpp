@@ -28,7 +28,7 @@ EntsoeParameterManager::EntsoeParameterManager(){
         {"Energy storage", "B25"},
     };
 
-    documentTypes = {
+    processTypes = {
         {"Day ahead", "A01"},
         {"Intra day incremental", "A02"},
         {"Realised", "A16"},
@@ -49,7 +49,7 @@ EntsoeParameterManager::EntsoeParameterManager(){
         {"Local Selection aFRR", "A68"}
     };
 
-    processTypes = {
+    documentTypes = {
         {"Day ahead", "A01"},
         {"Intra day incremental", "A02"},
         {"Finalized schedule", "A09"},
@@ -109,6 +109,10 @@ EntsoeParameterManager::EntsoeParameterManager(){
         {"Flow-based allocations", "B11"},
         {"Aggregated netted external TSO schedule document", "B17"},
         {"Bid Availability Document", "B45"}
+    };
+
+    inDomains = {
+        {"Germany", "10Y1001A1001A83F"}
     };
 }
 

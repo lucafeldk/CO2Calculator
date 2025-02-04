@@ -112,6 +112,11 @@ EntsoeParameterManager::EntsoeParameterManager(){
     };
 
     inDomains = {
+        {"Austria", "10YAT-APG------L"},
+        {"Belgium", "10YBE----------2"},
+        {"Czech Republic", "10YCZ-CEPS-----N"},
+        {"Denmark", "10Y1001A1001A65H"},
+        {"France" , "10YFR-RTE------C"},
         {"Germany", "10Y1001A1001A83F"}
     };
 }

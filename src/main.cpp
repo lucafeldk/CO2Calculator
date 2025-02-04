@@ -30,7 +30,7 @@ int main() {
         {"psrType", "&psrType=" + paramManager.getPsrType("Fossil Brown coal")},
         {"inDomain", "&in_Domain=" + paramManager.getInDomain("Germany")},
         {"prdStart", "&periodStart=202308152200"},
-        {"prdEnd", "&periodEnd=202308162200"},
+        {"prdEnd", "&periodEnd=202308152230"},
     };
 
     // create a first API Client 

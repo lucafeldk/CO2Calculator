@@ -1,22 +1,58 @@
 #include "DataStorageManager.h"
 
 DataStorageManager::DataStorageManager(const std::string& dbPath){
-
+    if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK){
+        std::cerr << "Error opening database: " << sqlite3_errmsg(db) << std::endl;
+        db = nullptr;
+    }
 }
 
 DataStorageManager::~DataStorageManager(){
-
+    if (db){
+        sqlite3_close(db);
+    }
 }
 
 bool DataStorageManager::insertData(const std::string& timestamp, const std::string& country,
                     const std::string& generationType, double generationMW){
+    // creates query syntax string for sql query
+    std::string query = "INSERT INTO actualData(Timestamp, Country, GenerationType,Generation_MW)"
+                        "VALUES ('" + timestamp + "', '" + country + "', '" + generationType + "', " + std::to_string(generationMW) + ") "
+                        "ON CONFLICT(Timestamp, GenerationType) DO UPDATE SET Generation_MW = " + std::to_string(generationMW) + ";";
+    return executeQuery(query);
+}
+
+bool DataStorageManager::executeQuery(const std::string& query){
+    // executes a sql query, false: query failed, true:query sucess entry are made in the database
+    char* errorMessage = nullptr;
+    if(sqlite3_exec(db, query.c_str(),nullptr, nullptr, &errorMessage) != SQLITE_OK){
+        std::cerr << "SQL error: " << errorMessage << std::endl;
+        sqlite3_free(errorMessage);
+        return false;
+    }
+    return true;
+
 
 }
 
 std::vector<std::tuple<std::string, std::string, std::string, double>> DataStorageManager::fetchData(){
+    std::vector<std::tuple<std::string, std::string, std::string, double>> results;
+    std::string query = "SELECT Timestamp, Country, GenerationType, Generation_MW FROM actualData;";
+    sqlite3_stmt* stmt;
 
+    if(sqlite3_prepare_v2(db, query.c_str(), -1 ,&stmt, nullptr) == SQLITE_OK){
+        while(sqlite3_step(stmt) == SQLITE_ROW){
+            std::string timestamp = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            std::string country = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            std::string generationType = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+            double generationMW = sqlite3_column_double(stmt, 3);
+            results.emplace_back(timestamp, country, generationType, generationMW);
+        }
+        sqlite3_finalize(stmt);
+    }
+    else{
+        std::cerr << "SQL error: Unable to fetch data" << std::endl;
+    }
+    return results; 
 }
 
-bool DataStorageManager::executeQuery(const std::string& query){
-
-}

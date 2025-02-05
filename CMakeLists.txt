@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_executable(main src/main.cpp src/APIClient.cpp src/EntsoeParameterManager.cpp)
+add_executable(main src/main.cpp src/APIClient.cpp src/EntsoeParameterManager.cpp src/DataStorageManager.cpp)
 
 if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -54,6 +54,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pugixml)
 target_link_libraries(main PRIVATE pugixml)
+
+# Füge SQLite als externe Bibliothek hinzu
+find_package(SQLite3 REQUIRED)
+include_directories(${SQLite3_INCLUDE_DIRS})
+link_directories(${SQLite3_LIBRARIES})
+
+# SQLite-Bibliothek linken
+target_link_libraries(main ${SQLite3_LIBRARIES})
 
 # copys the config.json into build folder for the compilation
 configure_file(${CMAKE_SOURCE_DIR}/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)

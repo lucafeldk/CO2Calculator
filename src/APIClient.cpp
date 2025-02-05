@@ -1,4 +1,5 @@
 #include "APIClient.h"
+#include "DataStorageManager.h"
 #include <cpr/cpr.h>
 #include <pugixml.hpp>
 #include <iostream>
@@ -73,23 +74,27 @@ void APIClient::xml_parser(cpr::Response& response){
     // extract the Information from the xml response
     pugi::xml_node root = doc.child("GL_MarketDocument");
     pugi::xml_node period = root.child("TimeSeries").child("Period"); // in the xml period node the <point> values are stored
-    
-    std::string documentID = root.child("mRID").text().as_string();
+
     std::string createdDateTime = root.child("createdDateTime").text().as_string();
     std::string startTime = root.child("time_Period.timeInterval").child("start").text().as_string();
     std::string endTime = root.child("time_Period.timeInterval").child("end").text().as_string();
-    //int quantity = root.child("TimeSeries").child("Period").child("Point").child("quantity").text().as_int();
-
-    // print out the parsed values
-    std::cout << "Document ID: " << documentID << std::endl;
-    std::cout << "Date: " << createdDateTime << std::endl;
-    std::cout << "Time Interval: " << startTime << " - " << endTime << std::endl;
+    std::string generationType = root.child("TimeSeries").child("MktPSRType").child("psrType").text().as_string();
+    std::string country = "Germany"; // Standardwert, da dein Schema das so vorsieht
+    
+    // create database manager object and insert data into db
+    DataStorageManager dbManager("database/DB_CO2Calc.db");
+    for (pugi::xml_node point : period.children("Point")) {
+        int quantity = point.child("quantity").text().as_int();
+        dbManager.insertData(startTime, country, generationType, quantity);
+    }
 
     // loop through the xml <point> messages where the <quantity> (real values) are stored
+    /*
     for(pugi::xml_node point : period.children("Point")){
         int quantity = point.child("quantity").text().as_int();
         std::cout << "Quantity: " << quantity << " MW" << std::endl;
     }
+    */
 }
 
 

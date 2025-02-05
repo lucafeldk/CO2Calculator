@@ -6,3 +6,11 @@
 --    CO2Emission_kwhg REAL NOT NULL,
 --    PRIMARY KEY (Timestamp, GenerationType)
 --);
+
+CREATE TABLE actualData (
+    Timestamp TEXT NOT NULL,
+    Country TEXT NOT NULL,
+    GenerationType TEXT NOT NULL,
+    Generation_MW REAL NOT NULL,
+    PRIMARY KEY (Timestamp, GenerationType)
+);

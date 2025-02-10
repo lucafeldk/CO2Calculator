@@ -35,5 +35,6 @@
 /.vscode/*
 /build/
 
-#Files
+#FilesS
 config.json
+

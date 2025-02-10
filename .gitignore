@@ -37,4 +37,4 @@
 
 #FilesS
 config.json
-
+*.db

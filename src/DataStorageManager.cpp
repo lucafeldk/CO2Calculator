@@ -5,6 +5,9 @@ DataStorageManager::DataStorageManager(const std::string& dbPath){
         std::cerr << "Error opening database: " << sqlite3_errmsg(db) << std::endl;
         db = nullptr;
     }
+    else{
+        createTable("actualData");
+    }
 }
 
 DataStorageManager::~DataStorageManager(){
@@ -24,6 +27,17 @@ bool DataStorageManager::insertData(const std::string& timestamp, const std::str
 
 bool DataStorageManager::deleteData(const std::string& tableName){
     std::string query = "DELETE FROM " + tableName;
+    return executeQuery(query);
+}
+
+bool DataStorageManager::createTable(const std::string& tableName){
+    std::string query = "CREATE TABLE IF NOT EXISTS" + tableName + "("
+        "Timestamp TEXT NOT NULL,"
+        "Country TEXT NOT NULL DEFAULT 'Germany',"
+        "GenerationType TEXT NOT NULL,"
+        "Generation_MW REAL NOT NULL,"
+        "PRIMARY KEY (Timestamp, GenerationType)"
+    ");";
     return executeQuery(query);
 }
 

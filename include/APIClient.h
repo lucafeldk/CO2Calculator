@@ -24,7 +24,7 @@ class APIClient{
         void get_request();                                                                 //API get Request method
         void xml_parser(cpr::Response& response);                                           //Data parser for xml 
         static std::chrono::system_clock::time_point string_to_chrono(const std::string& date);                                     
-        static std::string chrono_to_string(const std::chrono::system_clock::time_point time_point);
+        static std::string chrono_to_string(const std::chrono::system_clock::time_point date);
 };
 
 #endif

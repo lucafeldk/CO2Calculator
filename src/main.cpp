@@ -32,19 +32,21 @@ int main() {
         {"prcType", "&processType=" + paramManager.getProcessType("Realised")},
         {"psrType", "&psrType=" + paramManager.getPsrType("Fossil Brown coal")},
         {"inDomain", "&in_Domain=" + paramManager.getInDomain("Germany")},
-        {"prdStart", "&periodStart=202308152200"},
-        {"prdEnd", "&periodEnd=202308152300"},
+        {"prdStart", "&periodStart=202306152200"},
+        {"prdEnd", "&periodEnd=202308152215"},
     };
 
     // create a first API Client 
     APIClient firstClient(baseUrl, apiKey);
     firstClient.config_request(params);
+    std::cout << "Requesting Data..." << std::endl;
     firstClient.get_request();
+    std::cout << "Data saved" << std::endl;
 
     //
-    DataStorageManager DbManager("../database/DB_CO2Calc.db");
+    //DataStorageManager DbManager("../database/DB_CO2Calc.db");
     //auto deleteData = DbManager.deleteData("actualData");
-    auto fetchedData = DbManager.fetchData();
+    //auto fetchedData = DbManager.fetchData();
     
     // Print all tuples in CSV format
     /*
@@ -57,9 +59,10 @@ int main() {
 
     
     //testing for chrono converter
+    /*
     std::string date = "202308152200";
     std::cout << date.size() << std::endl;
     std::chrono::system_clock::time_point dateTM = APIClient::string_to_chrono(date);
     std::cout << APIClient::chrono_to_string(dateTM) << std::endl;;
-    
+    */
 }

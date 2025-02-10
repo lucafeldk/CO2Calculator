@@ -19,7 +19,8 @@ class DataStorageManager{
                     const std::string& generationType, double generationMW);
 
     std::vector<std::tuple<std::string, std::string, std::string, double>> fetchData();
-    bool deleteData(const std::string& tableName);                              
+    bool deleteData(const std::string& tableName);   
+    bool createTable(const std::string& tableName);                           
 
 };
 

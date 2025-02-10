@@ -4,6 +4,8 @@
 #include <pugixml.hpp>
 #include <iostream>
 
+
+
 APIClient::APIClient(const std::string& base, const std::string& apiKey){
     //Initialising the API Client
     //Configuring examplary API Get Http adress
@@ -80,24 +82,60 @@ void APIClient::xml_parser(cpr::Response& response){
     std::string endTime = root.child("time_Period.timeInterval").child("end").text().as_string();
     std::string generationType = root.child("TimeSeries").child("MktPSRType").child("psrType").text().as_string();
     std::string country = "Germany"; // Standardwert, da dein Schema das so vorsieht
+
+
+    //create datetime for the loop
+    std::chrono::system_clock::time_point timestamp = string_to_chrono(periodStart.erase(0,13));
     
     // create database manager object and insert data into db
-    DataStorageManager dbManager("database/DB_CO2Calc.db");
+    DataStorageManager dbManager("../database/DB_CO2Calc.db");
     for (pugi::xml_node point : period.children("Point")) {
         int quantity = point.child("quantity").text().as_int();
-        dbManager.insertData(startTime, country, generationType, quantity);
+        dbManager.insertData(chrono_to_string(timestamp), country, generationType, quantity);
+        timestamp += std::chrono::minutes(15);
     }
 
     // loop through the xml <point> messages where the <quantity> (real values) are stored
     /*
     for(pugi::xml_node point : period.children("Point")){
         int quantity = point.child("quantity").text().as_int();
-        std::cout << "Quantity: " << quantity << " MW" << std::endl;
+        std::cout << "Quantity: " << Quantity << " MW" << std::endl;
     }
     */
 }
 
+std::chrono::system_clock::time_point APIClient::string_to_chrono(const std::string& date){
+   
+    if (date.size() != 12) { // checks if the date has the correct size
+        throw std::runtime_error("Ungültiges Datumsformat: " + date);
+    }
 
+    std::tm tm = {};
+    tm.tm_year = std::stoi(date.substr(0, 4)) - 1900; // Year 
+    tm.tm_mon  = std::stoi(date.substr(4, 2)) - 1;    // month
+    tm.tm_mday = std::stoi(date.substr(6, 2));        // day
+    tm.tm_hour = std::stoi(date.substr(8, 2));        // hour
+    tm.tm_min  = std::stoi(date.substr(10, 2));       // minute
+    tm.tm_sec  = 0; // seconds always 0
+
+    std::time_t timestamp = std::mktime(&tm);
+    return std::chrono::system_clock::from_time_t(timestamp);
+
+}
+
+std::string APIClient::chrono_to_string (const std::chrono::system_clock::time_point date) {
+    // Convert chrono time back to string
+    std::time_t time_t_val = std::chrono::system_clock::to_time_t(date);
+
+    // time_t to struct tm local time
+    std::tm* tm_struct = std::localtime(&time_t_val);
+
+    // format the string
+    std::ostringstream ss;
+    ss << std::put_time(tm_struct, "%Y%m%d%H%M"); // Format YYYYMMDDHHMMSS
+
+    return ss.str();
+}
 
 
 

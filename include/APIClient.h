@@ -18,12 +18,13 @@ class APIClient{
         std::string requestUrl;
     
     public:
-        APIClient(const std::string& base, const std::string& apiKey);                       //Constructor
+        APIClient(const std::string& base, const std::string& apiKey);                      //Constructor
         void config_request(std::unordered_map<std::string,  std::string>& parameter);      //config method to configure the request
         void create_requestUrl();
         void get_request();                                                                 //API get Request method
-        void xml_parser(cpr::Response& response);                                           //Data parser for xml
-
+        void xml_parser(cpr::Response& response);                                           //Data parser for xml 
+        static std::chrono::system_clock::time_point string_to_chrono(const std::string& date);                                     
+        static std::string chrono_to_string(const std::chrono::system_clock::time_point time_point);
 };
 
 #endif

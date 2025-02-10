@@ -22,6 +22,11 @@ bool DataStorageManager::insertData(const std::string& timestamp, const std::str
     return executeQuery(query);
 }
 
+bool DataStorageManager::deleteData(const std::string& tableName){
+    std::string query = "DELETE FROM " + tableName;
+    return executeQuery(query);
+}
+
 bool DataStorageManager::executeQuery(const std::string& query){
     // executes a sql query, false: query failed, true:query sucess entry are made in the database
     char* errorMessage = nullptr;
@@ -31,8 +36,6 @@ bool DataStorageManager::executeQuery(const std::string& query){
         return false;
     }
     return true;
-
-
 }
 
 std::vector<std::tuple<std::string, std::string, std::string, double>> DataStorageManager::fetchData(){

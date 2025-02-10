@@ -73,25 +73,19 @@ void APIClient::xml_parser(cpr::Response& response){
         return;
     };
 
-    // extract the Information from the xml response
+    // specify nodes where to extract Information
     pugi::xml_node root = doc.child("GL_MarketDocument");
     pugi::xml_node period = root.child("TimeSeries").child("Period"); // in the xml period node the <point> values are stored
-
-    std::string createdDateTime = root.child("createdDateTime").text().as_string();
-    std::string startTime = root.child("time_Period.timeInterval").child("start").text().as_string();
-    std::string endTime = root.child("time_Period.timeInterval").child("end").text().as_string();
-    std::string generationType = root.child("TimeSeries").child("MktPSRType").child("psrType").text().as_string();
-    std::string country = "Germany"; // Standardwert, da dein Schema das so vorsieht
-
 
     //create datetime for the loop
     std::chrono::system_clock::time_point timestamp = string_to_chrono(periodStart.erase(0,13));
     
     // create database manager object and insert data into db
+    //endDate not included eg 22:00-23:00, 23:00 is not included meaning data from 22:00-22:45
     DataStorageManager dbManager("../database/DB_CO2Calc.db");
     for (pugi::xml_node point : period.children("Point")) {
         int quantity = point.child("quantity").text().as_int();
-        dbManager.insertData(chrono_to_string(timestamp), country, generationType, quantity);
+        dbManager.insertData(chrono_to_string(timestamp), inDomain, psrType, quantity);
         timestamp += std::chrono::minutes(15);
     }
 
@@ -118,6 +112,8 @@ std::chrono::system_clock::time_point APIClient::string_to_chrono(const std::str
     tm.tm_min  = std::stoi(date.substr(10, 2));       // minute
     tm.tm_sec  = 0; // seconds always 0
 
+    tm.tm_isdst = -1;  // deactivates automatic summertime detection
+
     std::time_t timestamp = std::mktime(&tm);
     return std::chrono::system_clock::from_time_t(timestamp);
 
@@ -127,8 +123,8 @@ std::string APIClient::chrono_to_string (const std::chrono::system_clock::time_p
     // Convert chrono time back to string
     std::time_t time_t_val = std::chrono::system_clock::to_time_t(date);
 
-    // time_t to struct tm local time
-    std::tm* tm_struct = std::localtime(&time_t_val);
+    // time_t to utc timezone
+    std::tm* tm_struct = std::localtime(&time_t_val);//std::gmtime(&time_t_val);
 
     // format the string
     std::ostringstream ss;

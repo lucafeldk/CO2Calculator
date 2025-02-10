@@ -55,13 +55,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(pugixml)
 target_link_libraries(main PRIVATE pugixml)
 
-# Füge SQLite als externe Bibliothek hinzu
-find_package(SQLite3 REQUIRED)
-include_directories(${SQLite3_INCLUDE_DIRS})
-link_directories(${SQLite3_LIBRARIES})
+# Manuelle Angabe der SQLite3-Pfade
+set(SQLite3_INCLUDE_DIR "D:/Programme/MSYS2/mingw64/include")
+set(SQLite3_LIBRARY "D:/Programme/MSYS2/mingw64/lib/libsqlite3.a")
 
-# SQLite-Bibliothek linken
-target_link_libraries(main ${SQLite3_LIBRARIES})
+# Sicherstellen, dass CMake die Pfade nutzt
+include_directories(${SQLite3_INCLUDE_DIR})
+link_directories("D:/Programme/MSYS2/mingw64/lib")
+
+# SQLite3-Bibliothek explizit linken
+target_link_libraries(main PRIVATE ${SQLite3_LIBRARY})
 
 # copys the config.json into build folder for the compilation
 configure_file(${CMAKE_SOURCE_DIR}/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)

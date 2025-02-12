@@ -8,6 +8,10 @@
 #include "DataStorageManager.h"
 
 int main() {
+    clock_t begin, end; 
+    double time; 
+    begin = clock();  
+    
     //std::cout << "Current Working Directory: " << std::filesystem::current_path() << std::endl;
     
     // check if config.json exists
@@ -32,8 +36,8 @@ int main() {
         {"prcType", "&processType=" + paramManager.getProcessType("Realised")},
         {"psrType", "&psrType=" + paramManager.getPsrType("Fossil Brown coal")},
         {"inDomain", "&in_Domain=" + paramManager.getInDomain("Germany")},
-        {"prdStart", "&periodStart=202306152200"},
-        {"prdEnd", "&periodEnd=202308152215"},
+        {"prdStart", "&periodStart=202301010000"},
+        {"prdEnd", "&periodEnd=202401010015"},
     };
 
     // create a first API Client 
@@ -65,4 +69,9 @@ int main() {
     std::chrono::system_clock::time_point dateTM = APIClient::string_to_chrono(date);
     std::cout << APIClient::chrono_to_string(dateTM) << std::endl;;
     */
+
+    //your code to measure 
+    end = clock(); 
+    time = double(end - begin) / (double)CLOCKS_PER_SEC; 
+    std::cout << "Execution Time: " << time << std::endl;
 }

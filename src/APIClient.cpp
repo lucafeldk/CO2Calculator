@@ -1,8 +1,10 @@
 #include "APIClient.h"
 #include "DataStorageManager.h"
+#include "CO2Calculator.h"
 #include <cpr/cpr.h>
 #include <pugixml.hpp>
 #include <iostream>
+
 
 
 
@@ -79,15 +81,20 @@ void APIClient::xml_parser(cpr::Response& response){
 
     //create datetime for the loop
     std::chrono::system_clock::time_point timestamp = string_to_chrono(periodStart.erase(0,13));
-    
-    // create database manager object and insert data into db
-    //endDate not included eg 22:00-23:00, 23:00 is not included meaning data from 22:00-22:45
+    std::string psrT = psrType.erase(0,9);
+    //create database manager object and insert data into db
+    //endDate not included, eg 22:00-23:00, 23:00 is not included meaning data from 22:00-22:45
     DataStorageManager dbManager("../database/DB_CO2Calc.db");
+    CO2Calculator CO2Calc;
     for (pugi::xml_node point : period.children("Point")) {
-        int quantity = point.child("quantity").text().as_int();
-        dbManager.insertData(chrono_to_string(timestamp), inDomain, psrType, quantity);
+        double power = point.child("quantity").text().as_int();
+        double emissions = CO2Calc.calcCO2(power, psrT);    //calculate CO2Emissions
+        dbManager.insertData(chrono_to_string(timestamp), inDomain, psrType, power, emissions);
         timestamp += std::chrono::minutes(15);
     }
+
+    // close database and destroy object
+    dbManager.~DataStorageManager();
 
     // loop through the xml <point> messages where the <quantity> (real values) are stored
     /*

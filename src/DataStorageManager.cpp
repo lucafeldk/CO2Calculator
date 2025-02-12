@@ -1,4 +1,5 @@
 #include "DataStorageManager.h"
+#include <sstream>
 
 DataStorageManager::DataStorageManager(const std::string& dbPath){
     if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK){
@@ -17,12 +18,19 @@ DataStorageManager::~DataStorageManager(){
 }
 
 bool DataStorageManager::insertData(const std::string& timestamp, const std::string& country,
-                    const std::string& generationType, double generationMW){
+                    const std::string& generationType, double generationMW, double emissiongkwh){
     // creates query syntax string for sql query
-    std::string query = "INSERT INTO actualData(Timestamp, Country, GenerationType,Generation_MW)"
-                        "VALUES ('" + timestamp + "', '" + country + "', '" + generationType + "', " + std::to_string(generationMW) + ") "
-                        "ON CONFLICT(Timestamp, GenerationType) DO UPDATE SET Generation_MW = " + std::to_string(generationMW) + ";";
-    return executeQuery(query);
+    std::ostringstream query;
+
+    query << "INSERT INTO actualData (Timestamp, Country, GenerationType, Generation_MW, CO2Emissions_gCO2eq) "
+          << "VALUES ('" << timestamp << "', '" << country << "', '" << generationType << "', "
+          << generationMW << ", " << emissiongkwh << ") "
+          << "ON CONFLICT(Timestamp, GenerationType) DO UPDATE "
+          << "SET Generation_MW = " << generationMW << ", "
+          << "CO2Emissions_gCO2eq = " << emissiongkwh << ";";
+    
+    std::string sqlQuery = query.str();
+    return executeQuery(sqlQuery);
 }
 
 bool DataStorageManager::deleteData(const std::string& tableName){
@@ -31,11 +39,12 @@ bool DataStorageManager::deleteData(const std::string& tableName){
 }
 
 bool DataStorageManager::createTable(const std::string& tableName){
-    std::string query = "CREATE TABLE IF NOT EXISTS" + tableName + "("
+    std::string query = "CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "Timestamp TEXT NOT NULL,"
         "Country TEXT NOT NULL DEFAULT 'Germany',"
         "GenerationType TEXT NOT NULL,"
         "Generation_MW REAL NOT NULL,"
+        "CO2Emissions_gCO2eq REAL NOT NULL,"  
         "PRIMARY KEY (Timestamp, GenerationType)"
     ");";
     return executeQuery(query);
@@ -54,7 +63,7 @@ bool DataStorageManager::executeQuery(const std::string& query){
 
 std::vector<std::tuple<std::string, std::string, std::string, double>> DataStorageManager::fetchData(){
     std::vector<std::tuple<std::string, std::string, std::string, double>> results;
-    std::string query = "SELECT Timestamp, Country, GenerationType, Generation_MW FROM actualData;";
+    std::string query = "SELECT Timestamp, Country, GenerationType, Generation_MW, CO2Emissions_gCO2eq FROM actualData;";
     sqlite3_stmt* stmt;
 
     if(sqlite3_prepare_v2(db, query.c_str(), -1 ,&stmt, nullptr) == SQLITE_OK){

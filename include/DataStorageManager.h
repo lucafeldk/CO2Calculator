@@ -16,7 +16,7 @@ class DataStorageManager{
     ~DataStorageManager();                          // Destructor
 
     bool insertData(const std::string& timestamp, const std::string& country,
-                    const std::string& generationType, double generationMW);
+                    const std::string& generationType, double generationMW, double emissiongkwh);
 
     std::vector<std::tuple<std::string, std::string, std::string, double>> fetchData();
     bool deleteData(const std::string& tableName);   

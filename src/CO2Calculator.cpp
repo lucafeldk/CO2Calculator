@@ -1,9 +1,10 @@
 #include "CO2Calculator.h"
+#include <iostream>
 
 CO2Calculator::CO2Calculator(){
     emissionFactor ={       //EMISSION FACTOR IN gCO2eq/kWh
         {"B01", 266.8},     //"Biomass"
-        {"BO2", 1209.9},    //"Fossil Brown coal"
+        {"B02", 1209.9},    //"Fossil Brown coal"
         {"B03", 952},       //"Coal-derivded gas"
         {"B04", 467.4},     //"Fossil Gas"
         {"B05", 1051.5},    //"Fossil Hard coal"
@@ -25,7 +26,8 @@ CO2Calculator::CO2Calculator(){
     };
 }
 
-void CO2Calculator::calc_CO2(){
-    
-    emissionfactor
+double CO2Calculator::calcCO2(double power, std::string& psrType){
+    // Acutal CO2eq Emmissions per type, 15-minute Intervall values [gCO2eq/kwh]
+    // emissionPerType[gCO2eq] = power[kw] * timeIntervall[h] * emissionfactor [gCO2eq/kwh]
+    return (power*1000*0.25*emissionFactor[psrType]);
 }

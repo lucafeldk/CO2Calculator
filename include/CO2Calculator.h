@@ -9,7 +9,7 @@ class CO2Calculator{
         std::unordered_map<std::string, double> emissionFactor;
     public:
         CO2Calculator();
-        void calculate_CO2();
+        double calcCO2(double power, std::string& psrType);
 };
 
 #endif

@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-add_executable(main src/main.cpp src/APIClient.cpp src/EntsoeParameterManager.cpp src/DataStorageManager.cpp)
+add_executable(main src/main.cpp src/APIClient.cpp src/EntsoeParameterManager.cpp src/DataStorageManager.cpp src/CO2Calculator.cpp)
 
 if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

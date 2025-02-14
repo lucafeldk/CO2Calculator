@@ -18,19 +18,32 @@ DataStorageManager::~DataStorageManager(){
 }
 
 bool DataStorageManager::insertData(const std::string& timestamp, const std::string& country,
-                    const std::string& generationType, double generationMW, double emissiongkwh){
-    // creates query syntax string for sql query
-    std::ostringstream query;
-
-    query << "INSERT INTO actualData (Timestamp, Country, GenerationType, Generation_MW, CO2Emissions_gCO2eq) "
-          << "VALUES ('" << timestamp << "', '" << country << "', '" << generationType << "', "
-          << generationMW << ", " << emissiongkwh << ") "
-          << "ON CONFLICT(Timestamp, GenerationType) DO UPDATE "
-          << "SET Generation_MW = " << generationMW << ", "
-          << "CO2Emissions_gCO2eq = " << emissiongkwh << ";";
-    
-    std::string sqlQuery = query.str();
-    return executeQuery(sqlQuery);
+                    const std::string& generationType, double generationMW, double emissiongkwh) {
+    const char* sql = "INSERT INTO actualData (Timestamp, Country, GenerationType, Generation_MW, CO2Emissions_gCO2eq) "
+                    "VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(Timestamp, GenerationType) DO UPDATE "
+                    "SET Generation_MW = excluded.Generation_MW, CO2Emissions_gCO2eq = excluded.CO2Emissions_gCO2eq;";
+  
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "SQL error (prepare): " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+  
+    // Parameter setzen (Prepared Statements)
+    sqlite3_bind_text(stmt, 1, timestamp.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, country.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, generationType.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmt, 4, generationMW);
+    sqlite3_bind_double(stmt, 5, emissiongkwh);
+  
+    // SQL ausführen
+    bool success = (sqlite3_step(stmt) == SQLITE_DONE);
+  
+    // Prepared Statement schließen
+    sqlite3_finalize(stmt);
+  
+    return success;
 }
 
 bool DataStorageManager::deleteData(const std::string& tableName){
@@ -80,5 +93,13 @@ std::vector<std::tuple<std::string, std::string, std::string, double>> DataStora
         std::cerr << "SQL error: Unable to fetch data" << std::endl;
     }
     return results; 
+}
+
+void DataStorageManager::beginTransaction(){
+    executeQuery("BEGIN TRANSACTION;");
+}
+
+void DataStorageManager::commitTransaction(){
+    executeQuery("COMMIT;");
 }
 

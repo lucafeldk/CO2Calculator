@@ -20,7 +20,9 @@ class DataStorageManager{
 
     std::vector<std::tuple<std::string, std::string, std::string, double>> fetchData();
     bool deleteData(const std::string& tableName);   
-    bool createTable(const std::string& tableName);                           
+    bool createTable(const std::string& tableName);  
+    void beginTransaction();
+    void commitTransaction();                         
 
 };
 

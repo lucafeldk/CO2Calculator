@@ -43,7 +43,10 @@ void APIClient::config_request(std::unordered_map<std::string, std::string>& par
 void APIClient::get_request(){
    
      // api get request via cpr
-    cpr::Response response = cpr::Get(cpr::Url{requestUrl});
+    cpr::Response response = cpr::Get(
+        cpr::Url{requestUrl},
+        cpr::Header{{"Accept-Encoding", "gzip"}}
+    );
     
     // Error handling for the get request
     if (response.error) {
@@ -57,6 +60,7 @@ void APIClient::get_request(){
 
     //Print out Information from the response
     std::cout << "Status Code: " << response.status_code << std::endl;
+    std::cout << "Response Headers: " << response.header["Content-Encoding"] << std::endl;
     //std::cout << "Response:" << response.text << std::endl;
     
     // call xml_parser to handle the xml response message
@@ -64,8 +68,9 @@ void APIClient::get_request(){
 
 }
 
+
 void APIClient::xml_parser(cpr::Response& response){
-        //read in xml response 
+    //read in xml response 
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_string(response.text.c_str());
     
@@ -86,23 +91,17 @@ void APIClient::xml_parser(cpr::Response& response){
     //endDate not included, eg 22:00-23:00, 23:00 is not included meaning data from 22:00-22:45
     DataStorageManager dbManager("../database/DB_CO2Calc.db");
     CO2Calculator CO2Calc;
-    for (pugi::xml_node point : period.children("Point")) {
-        double power = point.child("quantity").text().as_int();
+
+    dbManager.beginTransaction(); //ensures batch insert
+    for (pugi::xml_node point = period.child("Point"); point; point = point.next_sibling("Point")) {
+        double power = point.child("quantity").text().as_double();
         double emissions = CO2Calc.calcCO2(power, psrT);    //calculate CO2Emissions
         dbManager.insertData(chrono_to_string(timestamp), inDomain, psrType, power, emissions);
         timestamp += std::chrono::minutes(15);
     }
-
+    dbManager.commitTransaction();
     // close database and destroy object
     dbManager.~DataStorageManager();
-
-    // loop through the xml <point> messages where the <quantity> (real values) are stored
-    /*
-    for(pugi::xml_node point : period.children("Point")){
-        int quantity = point.child("quantity").text().as_int();
-        std::cout << "Quantity: " << Quantity << " MW" << std::endl;
-    }
-    */
 }
 
 std::chrono::system_clock::time_point APIClient::string_to_chrono(const std::string& date){

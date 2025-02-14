@@ -41,6 +41,8 @@ int main() {
     };
 
     // create a first API Client 
+    DataStorageManager DbManager("../database/DB_CO2Calc.db");
+    auto deleteData = DbManager.deleteData("actualData");
     APIClient firstClient(baseUrl, apiKey);
     firstClient.config_request(params);
     std::cout << "Requesting Data..." << std::endl;

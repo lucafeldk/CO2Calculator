@@ -7,6 +7,7 @@ DataStorageManager::DataStorageManager(const std::string& dbPath){
         db = nullptr;
     }
     else{
+        executeQuery("PRAGMA journal_mode=WAL;"); 
         createTable("actualData");
     }
 }

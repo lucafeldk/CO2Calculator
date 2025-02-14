@@ -32,21 +32,21 @@ int main() {
     // create parameter manager object and configure a param set for the request
     EntsoeParameterManager paramManager;
     std::unordered_map<std::string, std::string> params = {
-        {"docType", "?documentType=" + paramManager.getDocumentType("Actual generation per type")},
-        {"prcType", "&processType=" + paramManager.getProcessType("Realised")},
-        {"psrType", "&psrType=" + paramManager.getPsrType("Fossil Brown coal")},
-        {"inDomain", "&in_Domain=" + paramManager.getInDomain("Germany")},
-        {"prdStart", "&periodStart=202301010000"},
-        {"prdEnd", "&periodEnd=202401010015"},
+        {"docType",  paramManager.getDocumentType("Actual generation per type")},
+        {"prcType",  paramManager.getProcessType("Realised")},
+        {"psrType",  paramManager.getPsrType("Fossil Brown coal")},
+        {"inDomain", paramManager.getInDomain("Germany")},
+        {"prdStart", "202301010000"},
+        {"prdEnd", "202401010015"},
     };
 
     // create a first API Client 
     DataStorageManager DbManager("../database/DB_CO2Calc.db");
     auto deleteData = DbManager.deleteData("actualData");
     APIClient firstClient(baseUrl, apiKey);
-    firstClient.config_request(params);
     std::cout << "Requesting Data..." << std::endl;
-    firstClient.get_request();
+    //firstClient.get_request(params);
+    firstClient.parallel_request(8,params);
     std::cout << "Data saved" << std::endl;
 
     //

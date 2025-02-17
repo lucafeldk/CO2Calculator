@@ -71,7 +71,7 @@ void APIClient::get_request(std::unordered_map<std::string,  std::string>& param
     //Print out Information from the response
     std::cout << "Status Code: " << response.status_code << std::endl;
     std::cout << "Response Headers: " << response.header["Content-Encoding"] << std::endl;
-    //std::cout << "Response:" << response.text << std::endl;
+    std::cout << "Response:" << response.text << std::endl;
     
     // call xml_parser to handle the xml response message
     xml_parser(response);
@@ -104,7 +104,8 @@ void APIClient::xml_parser(cpr::Response& response){
     dbManager.beginTransaction(); //ensures batch insert
     for (pugi::xml_node point = period.child("Point"); point; point = point.next_sibling("Point")) {
         double power = point.child("quantity").text().as_double();
-        double emissions = CO2Calc.calcCO2(power, psrType);    //calculate CO2Emissions
+        double emissions = CO2Calc.calcCO2(power, psrType);
+        std::cout << chrono_to_string(timestamp) << std::endl;    //calculate CO2Emissions
         dbManager.insertData(chrono_to_string(timestamp), inDomain, psrType, power, emissions);
         timestamp += std::chrono::minutes(15);
     }
@@ -183,20 +184,5 @@ std::vector<std::pair<std::string, std::string>> APIClient::split_time_range(con
     return timeIntervals;
 }
 
-void APIClient::parallel_request(int parts, std::unordered_map<std::string,  std::string>& parameter){
 
-    std::vector<std::future<void>> futures; // vector for the possible parallel processes
-    std::vector<std::pair<std::string, std::string>> timeRanges = split_time_range(parameter["prdStart"], parameter["prdEnd"], parts);
-    for (std::pair<std::string,std::string> tR : timeRanges){
-        //std::cout << tR.first << ", " << tR.second << std::endl;
-        parameter["prdStart"] = tR.first;
-        parameter["prdEnd"] = tR.second; 
-        futures.push_back(std::async(std::launch::async, &APIClient::get_request,this , std::ref(parameter)));
-    }
-
-    // wait till all processes are ready
-    for(std::future<void>& f : futures){
-        f.get();
-    }
-}
 

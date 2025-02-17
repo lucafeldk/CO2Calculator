@@ -3,6 +3,7 @@
 #include <iostream>
 #include <filesystem>
 #include <pugixml.hpp>
+#include <future>
 #include "APIClient.h"
 #include "EntsoeParameterManager.h"
 #include "DataStorageManager.h"
@@ -36,8 +37,8 @@ int main() {
         {"prcType",  paramManager.getProcessType("Realised")},
         {"psrType",  paramManager.getPsrType("Fossil Brown coal")},
         {"inDomain", paramManager.getInDomain("Germany")},
-        {"prdStart", "202301010000"},
-        {"prdEnd", "202401010015"},
+        {"prdStart", "202401282200"},
+        {"prdEnd", "202401282230"},
     };
 
     // create a first API Client 
@@ -45,10 +46,34 @@ int main() {
     auto deleteData = DbManager.deleteData("actualData");
     APIClient firstClient(baseUrl, apiKey);
     std::cout << "Requesting Data..." << std::endl;
-    //firstClient.get_request(params);
-    firstClient.parallel_request(8,params);
-    std::cout << "Data saved" << std::endl;
+    firstClient.get_request(params);
 
+    // parallel requests
+    std::vector<std::future<void>> futures;
+    std::vector<std::pair<std::string, std::string>> timeRanges = APIClient::split_time_range(params["prdStart"], params["prdEnd"], 4);
+    //for (auto& i :timeRanges){
+    //    std::cout << i.first << ", " << i.second << std::endl;
+    //}
+    /*
+    for (const auto& tR : timeRanges) {
+        std::unordered_map<std::string, std::string> threadParams = params;
+        threadParams["prdStart"] = tR.first;
+        threadParams["prdEnd"] = tR.second;
+    
+        futures.emplace_back(std::async(std::launch::async, [=]() {
+            std::unordered_map<std::string, std::string> localParams = threadParams;  
+            APIClient client(baseUrl, apiKey);
+            client.get_request(localParams);
+        }));
+        
+    }
+
+    // Warten, bis alle Threads fertig sind
+    for (auto& f : futures) {
+        f.get();
+    }
+    
+    */
     //
     //DataStorageManager DbManager("../database/DB_CO2Calc.db");
     //auto deleteData = DbManager.deleteData("actualData");

@@ -27,6 +27,14 @@ if(WIN32) # Install dlls in the same directory as the executable on Windows
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()
 
+# bind the files to a lib
+add_library(co2_backend STATIC
+    src/APIClient.cpp
+    src/EntsoeParameterManager.cpp
+    src/DataStorageManager.cpp
+    src/CO2Calculator.cpp
+)
+
 include(FetchContent)
 
 # Fetch cpr Library for ease api calls

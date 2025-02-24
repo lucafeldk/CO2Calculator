@@ -38,3 +38,4 @@ backend/.vscode/*
 #FilesS
 config.json
 *.db
+CMakeLists.txt.user

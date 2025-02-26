@@ -19,14 +19,10 @@ set(PROJECT_SOURCES
     forms/mainwindow.ui
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-else()
-    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-endif()
+qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
 # Backend einbinden
 target_link_libraries(${PROJECT_NAME} PRIVATE co2_backend Qt${QT_VERSION_MAJOR}::Widgets)
@@ -50,3 +46,4 @@ if(QT_VERSION_MAJOR EQUAL 6)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/backend/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)

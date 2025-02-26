@@ -3,6 +3,7 @@
 #include <QCheckBox>
 #include <QListWidgetItem>
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)

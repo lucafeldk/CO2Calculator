@@ -4,8 +4,8 @@ project(CO2Calculator)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Backend hinzufügen
+# Backend als Bibliothek hinzufügen
 add_subdirectory(backend)
 
-# Frontend hinzufügen
+# Frontend als Hauptprogramm hinzufügen
 add_subdirectory(frontend)

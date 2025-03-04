@@ -13,11 +13,18 @@ class EntsoeParameterManager{
 
     public:
         EntsoeParameterManager(); // Constructor
+        
+        // Getter methods Key -> Value 
+        std::string getPsrType(const std::string& name) const;
+        std::string getDocumentType(const std::string& name) const;
+        std::string getProcessType(const std::string& name) const;
+        std::string getInDomain(const std::string& name) const;
 
-        std::string getPsrType(const std::string& code) const;
-        std::string getDocumentType(const std::string& code) const;
-        std::string getProcessType(const std::string& code) const;
-        std::string getInDomain(const std::string& code) const;
+        // Getter methods Value -> Key 
+        std::string getPsrTypeKey(const std::string& value) const;
+        std::string getDocumentTypeKey(const std::string& value) const;
+        std::string getProcessTypeKey(const std::string& value) const;
+        std::string getInDomainKey(const std::string& value) const;
 };
 
 #endif

@@ -6,9 +6,6 @@
 #include <iostream>
 #include <future>
 
-
-
-
 APIClient::APIClient(const std::string& base, const std::string& apiKey){
     //Initialising the API Client
     //Configuring examplary API Get Http adress

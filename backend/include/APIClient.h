@@ -26,6 +26,14 @@ class APIClient{
         static std::chrono::system_clock::time_point string_to_chrono(const std::string& date);                                    
         static std::string chrono_to_string(const std::chrono::system_clock::time_point date);
         static std::vector<std::pair<std::string, std::string>> split_time_range(const std::string& start, const std::string& end, int parts); //spliting into time ranges
+
+        // Get methods
+        std::string get_DocumentType() const { return documentType; }
+        std::string get_ProcessType() const { return processType; }
+        std::string get_PsrType() const { return psrType; }
+        std::string get_InDomain() const { return inDomain; }
+        std::string get_PeriodStart() const { return periodStart; }
+        std::string get_PeriodEnd() const { return periodEnd; }
 };
 
 #endif

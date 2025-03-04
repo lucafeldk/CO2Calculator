@@ -119,20 +119,55 @@ EntsoeParameterManager::EntsoeParameterManager(){
         {"France" , "10YFR-RTE------C"},
         {"Germany", "10Y1001A1001A83F"}
     };
+
+
+    // Fill in revers Map (Value → Key)
+    for (const auto& pair : psrTypes) {
+        psrTypesReverse[pair.second] = pair.first;
+    }
+    for (const auto& pair : processTypes) {
+        processTypesReverse[pair.second] = pair.first;
+    }
+    for (const auto& pair : documentTypes) {
+        documentTypesReverse[pair.second] = pair.first;
+    }
+    for (const auto& pair : inDomains) {
+        inDomainsReverse[pair.second] = pair.first;
+    }
 }
 
-std::string EntsoeParameterManager::getPsrType(const std::string& code) const {
-    return psrTypes.count(code) ? psrTypes.at(code) : "Unknown";
+
+// For Original map (key->value)
+std::string EntsoeParameterManager::getPsrType(const std::string& key) const {
+    return psrTypes.count(key) ? psrTypes.at(key) : "Unknown";
 }
 
-std::string EntsoeParameterManager::getDocumentType(const std::string& code) const {
-    return documentTypes.count(code) ? documentTypes.at(code) : "Unknown";
+std::string EntsoeParameterManager::getDocumentType(const std::string& key) const {
+    return documentTypes.count(key) ? documentTypes.at(key) : "Unknown";
 }
 
-std::string EntsoeParameterManager::getProcessType(const std::string& code) const {
-    return processTypes.count(code) ? processTypes.at(code) : "Unknown";
+std::string EntsoeParameterManager::getProcessType(const std::string& key) const {
+    return processTypes.count(key) ? processTypes.at(key) : "Unknown";
 }
 
-std::string EntsoeParameterManager::getInDomain(const std::string& country) const {
-    return inDomains.count(country) ? inDomains.at(country) : "Unknown";
+std::string EntsoeParameterManager::getInDomain(const std::string& key) const {
+    return inDomains.count(key) ? inDomains.at(key) : "Unknown";
+}
+
+
+// For Reversed maps (value->key)
+std::string EntsoeParameterManager::getPsrTypeKey(const std::string& value) const {
+    return psrTypesReverse.count(value) ? psrTypesReverse.at(value) : "Unknown";
+}
+
+std::string EntsoeParameterManager::getDocumentTypeKey(const std::string& value) const {
+    return documentTypesReverse.count(value) ? documentTypesReverse.at(value) : "Unknown";
+}
+
+std::string EntsoeParameterManager::getProcessTypeKey(const std::string& value) const {
+    return processTypesReverse.count(value) ? processTypesReverse.at(value) : "Unknown";
+}
+
+std::string EntsoeParameterManager::getInDomainKey(const std::string& value) const {
+    return inDomainsReverse.count(value) ? inDomainsReverse.at(value) : "Unknown";
 }

@@ -3,10 +3,14 @@
 #include "DataStorageManager.h"
 #include  "EntsoeParameterManager.h"
 #include <nlohmann/json.hpp>
+#include <filesystem>
+#include <QCoreApplication>
 
 
 bool DataProvider::is_data_cached(){
     // check if data is cached
+    // Work in progress for now
+    return 0;
 }
 
 std::vector<double> DataProvider::get_data(const std::string& periodStart,const std::string& periodEnd,
@@ -17,9 +21,13 @@ std::vector<double> DataProvider::get_data(const std::string& periodStart,const 
 
             // check if config.json exists
             // get the baseUrl and apikey from the config.json
-            std::ifstream configFile("config.json");
+
+            std::string configPath = QCoreApplication::applicationDirPath().toStdString() + "/config.json";
+            std::cout << "Trying to open config.json at: " << configPath << std::endl;
+            std::ifstream configFile(configPath);
             if (!configFile){
                  std::cerr << "Error:config.json file not found!" << std::endl;
+                 return {};
             }
             nlohmann::json config;
             configFile >> config;
@@ -40,11 +48,13 @@ std::vector<double> DataProvider::get_data(const std::string& periodStart,const 
             Client.get_request(requestParams);
             
             // setup connection to database and fetch data from data base
-            DataStorageManager DbManager("../database/DB_CO2Calc.db");
-            result = DbManager.fetchRealData(Client, "Generation_MW");
+            std::string dbPath = QCoreApplication::applicationDirPath().toStdString() + "/database/DB_CO2Calc.db";
+            std::cout << "Trying to open database at: " << dbPath << std::endl;
+            DataStorageManager DbManager(dbPath);
+            result = DbManager.fetchRealData(Client, valType);
 
             return result;
         }
-        // else data is cached
-
-    }
+        // else data is cached or partly cached (work in progress for now)
+}
+    

@@ -1,6 +1,7 @@
 #include "DataStorageManager.h"
 #include <sstream>
 
+
 DataStorageManager::DataStorageManager(const std::string& dbPath){
     if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK){
         std::cerr << "Error opening database: " << sqlite3_errmsg(db) << std::endl;
@@ -103,4 +104,37 @@ void DataStorageManager::beginTransaction(){
 void DataStorageManager::commitTransaction(){
     executeQuery("COMMIT;");
 }
+
+std::vector<double> DataStorageManager::fetchRealData(const APIClient& Client, std::string valType){
+    
+    std::vector<double> results;
+    std::string query = "SELECT " + valType + " FROM actualData WHERE Timestamp BETWEEN ? AND ? AND Country = ? AND GenerationType = ?;";
+    
+    //std::cout << Client.get_PsrType() << std::endl;
+    sqlite3_stmt* stmt;
+    std::string periodStart = Client.get_PeriodStart();
+    std::string periodEnd = Client.get_PeriodEnd();
+    std::string country = Client.get_InDomain();
+    std::string generationType = Client.get_PsrType();
+
+    if(sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK){
+        // Bind parameters    
+        sqlite3_bind_text(stmt, 1, periodStart.c_str(), -1, SQLITE_STATIC);  // Timestamp (Start)
+        sqlite3_bind_text(stmt, 2, periodEnd.c_str(), -1, SQLITE_STATIC);    // Timestamp (End)
+        sqlite3_bind_text(stmt, 3, country.c_str(), -1, SQLITE_STATIC);     // Country
+        sqlite3_bind_text(stmt, 4, generationType.c_str(), -1, SQLITE_STATIC);      // GenerationType
+
+        while(sqlite3_step(stmt) == SQLITE_ROW){
+            results.push_back(sqlite3_column_double(stmt, 0));
+        }
+
+        sqlite3_finalize(stmt);
+    }
+    else{
+        std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+    }
+    std::cout << results.size() << std::endl;
+    return results;
+}
+
 

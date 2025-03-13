@@ -67,7 +67,7 @@ void APIClient::get_request(std::unordered_map<std::string,  std::string>& param
 
     //Print out Information from the response
     std::cout << "Status Code: " << response.status_code << std::endl;
-    std::cout << "Response Headers: " << response.header["Content-Encoding"] << std::endl;
+    //std::cout << "Response Headers: " << response.header["Content-Encoding"] << std::endl;
     //std::cout << "Response:" << response.text << std::endl;
     
     // call xml_parser to handle the xml response message
@@ -102,13 +102,10 @@ void APIClient::xml_parser(cpr::Response& response){
     for (pugi::xml_node point = period.child("Point"); point; point = point.next_sibling("Point")) {
         double power = point.child("quantity").text().as_double();
         double emissions = CO2Calc.calcCO2(power, psrType);
-        std::cout << chrono_to_string(timestamp) << std::endl;    //calculate CO2Emissions
         dbManager.insertData(chrono_to_string(timestamp), inDomain, psrType, power, emissions);
         timestamp += std::chrono::minutes(15);
     }
     dbManager.commitTransaction();
-    // close database and destroy object
-    dbManager.~DataStorageManager();
 }
 
 std::chrono::system_clock::time_point APIClient::string_to_chrono(const std::string& date){

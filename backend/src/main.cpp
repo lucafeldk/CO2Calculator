@@ -7,6 +7,7 @@
 #include "APIClient.h"
 #include "EntsoeParameterManager.h"
 #include "DataStorageManager.h"
+#include "DataProvider.h"
 
 int main() {
     clock_t begin, end; 
@@ -14,7 +15,7 @@ int main() {
     begin = clock();  
     
     //std::cout << "Current Working Directory: " << std::filesystem::current_path() << std::endl;
-    
+    /*
     // check if config.json exists
     std::ifstream configFile("config.json");
     if (!configFile){
@@ -29,7 +30,7 @@ int main() {
 
     // Current base URL of the Entsoe API
     std::string const baseUrl = "https://web-api.tp.entsoe.eu/api";
-
+    */
     // create parameter manager object and configure a param set for the request
     EntsoeParameterManager paramManager;
     std::unordered_map<std::string, std::string> params = {
@@ -40,17 +41,24 @@ int main() {
         {"prdStart", "202401282200"},
         {"prdEnd", "202401282230"},
     };
-
+    
+    std::vector<double> requestData;
+    DataProvider Provider;
+    requestData = Provider.get_data("202401282200","202401282215","Fossil Brown coal", "Generation_MW","Germany","Actual generation per type", "Realised");
+    for (double& i :requestData){
+        std::cout << std::to_string(i) << std::endl;
+    }
     // create a first API Client 
+    /*
     DataStorageManager DbManager("../database/DB_CO2Calc.db");
     auto deleteData = DbManager.deleteData("actualData");
     APIClient firstClient(baseUrl, apiKey);
     std::cout << "Requesting Data..." << std::endl;
     firstClient.get_request(params);
-
+    */
     // parallel requests
-    std::vector<std::future<void>> futures;
-    std::vector<std::pair<std::string, std::string>> timeRanges = APIClient::split_time_range(params["prdStart"], params["prdEnd"], 4);
+    //std::vector<std::future<void>> futures;
+    //std::vector<std::pair<std::string, std::string>> timeRanges = APIClient::split_time_range(params["prdStart"], params["prdEnd"], 4);
     //for (auto& i :timeRanges){
     //    std::cout << i.first << ", " << i.second << std::endl;
     //}

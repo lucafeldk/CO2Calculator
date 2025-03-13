@@ -12,7 +12,6 @@
 class DataStorageManager{
     private:
     sqlite3* db;
-    EntsoeParameterManager* paramManager;
     bool executeQuery(const std::string& query);
     
     public:

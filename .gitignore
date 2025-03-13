@@ -33,6 +33,8 @@
 
 #Folders
 backend/.vscode/*
+backend/database/*
+backend/build/
 /build/
 .vscode
 

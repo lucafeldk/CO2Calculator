@@ -9,41 +9,40 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+# Qt sicherstellen
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets PrintSupport)
+
+# Include-Verzeichnisse setzen
+include_directories(${Qt6Core_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/backend/include)
+
+# QCustomPlot als statische Bibliothek
+add_library(qcustomplot STATIC qcustomplot.cpp)
+target_link_libraries(qcustomplot PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport)
 
 set(PROJECT_SOURCES
-    src/main.cpp
-    src/mainwindow.cpp
-    include/mainwindow.h
-    forms/mainwindow.ui
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
 )
 
-qt_add_executable(${PROJECT_NAME}
-    MANUAL_FINALIZATION
-    ${PROJECT_SOURCES}
-)
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
-# Backend einbinden
-target_link_libraries(${PROJECT_NAME} PRIVATE co2_backend Qt${QT_VERSION_MAJOR}::Widgets)
+# Richtige Reihenfolge der Verlinkungen
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::PrintSupport co2_backend qcustomplot)
 
-# Bundle- und Windows-Flags setzen
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
-)
-
-# Installationspfade für das fertige Programm setzen
-include(GNUInstallDirs)
-install(TARGETS ${PROJECT_NAME}
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/backend/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
+

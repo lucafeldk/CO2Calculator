@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QListWidgetItem>
+#include <unordered_map>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -34,9 +35,9 @@ private slots:
 
     void on_screenshotBtn_clicked();
 
-    void on_downlloadButton_clicked();
-
     void on_downloadButton_clicked();
+
+    //void createBarPlot(std::unordered_map<)
 
 private:
     Ui::MainWindow *ui;

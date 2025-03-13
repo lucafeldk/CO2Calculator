@@ -2,6 +2,9 @@
 #include "./ui_mainwindow.h"
 #include <QCheckBox>
 #include <QListWidgetItem>
+#include "DataProvider.h"
+#include <vector>
+#include "qcustomplot.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -24,6 +27,31 @@ MainWindow::MainWindow(QWidget *parent)
 
     setupCheckBoxList(ui->listGenerationType,generationList);
     setupCheckBoxList(ui->listRequestValues,requestValues);
+    ui->plotWidget;
+
+
+    // Neues QCustomPlot-Objekt erstellen
+    QCustomPlot *customPlot = new QCustomPlot(this);
+
+    // QCustomPlot in das vorhandene plotWidget integrieren
+    customPlot->setParent(ui->plotWidget);
+    customPlot->setGeometry(ui->plotWidget->rect()); // Größe anpassen
+
+    // Einfaches Plot-Beispiel
+    QVector<double> x(101), y(101);
+    for (int i = 0; i < 101; ++i)
+    {
+        x[i] = i / 50.0 - 1;  // x-Werte von -1 bis 1
+        y[i] = x[i] * x[i];    // Parabel-Funktion
+    }
+
+    customPlot->addGraph();
+    customPlot->graph(0)->setData(x, y);
+    customPlot->xAxis->setLabel("Datetime");
+    customPlot->yAxis->setLabel("Generated Power in MW");
+
+    customPlot->rescaleAxes(); // Achsen anpassen
+    customPlot->replot(); // Plot zeichnen
 }
 
 MainWindow::~MainWindow()
@@ -53,7 +81,12 @@ void MainWindow::on_applySettingsBtn_clicked()
     // 3. Turn Button inactive
 
     //Note: maybe make this a dynamic change when single parameters are edited
-
+    //DataProvider DataProvider1;
+    DataProvider DataProvider1;
+    std::vector <double> requestData = DataProvider1.get_data("202401282200","202401282230","Fossil Brown coal", "Generation_MW","Germany","Actual generation per type", "Realised");
+    for (double& i :requestData){
+        std::cout << std::to_string(i) << std::endl;
+    }
 }
 
 

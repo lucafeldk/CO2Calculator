@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <unordered_map>
+#include <QDateTimeEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,6 +39,10 @@ private slots:
     void on_downloadButton_clicked();
 
     QStringList getCheckedItems(QListWidget* listWidget);
+
+    void roundMinutes(QDateTimeEdit *dateTimeEdit);
+
+    void stepByMinutes(QDateTimeEdit *dateTimeEdit, int steps);
 
     //void createBarPlot(std::unordered_map<)
 

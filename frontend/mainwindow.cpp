@@ -2,6 +2,8 @@
 #include "./ui_mainwindow.h"
 #include <QCheckBox>
 #include <QListWidgetItem>
+#include <QVBoxLayout>
+#include <QWidget>
 #include "DataProvider.h"
 #include <vector>
 #include "qcustomplot.h"
@@ -12,6 +14,23 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    // Ensure startTime and endTime step by 15-minute intervals
+    connect(ui->startTime, &QDateTimeEdit::editingFinished, this, [=]() {
+        roundMinutes(ui->startTime);
+    });
+    connect(ui->endTime, &QDateTimeEdit::editingFinished, this, [=]() {
+        roundMinutes(ui->endTime);
+    });
+
+    // Ensure stepping moves by 15 minutes
+    connect(ui->startTime, &QAbstractSpinBox::stepBy, this, [=](int steps) {
+        stepByMinutes(ui->startTime, steps);
+    });
+    connect(ui->endTime, &QAbstractSpinBox::stepBy, this, [=](int steps) {
+        stepByMinutes(ui->endTime, steps);
+    });
+
     QStringList generationList = {
         "Generation", "Biomass", "Fossil Brown coal", "Fossil Coal-derived gas",
         "Fossil Gas", "Fossil Hard Coal", "Fossil Oil", "Fossil Oil Shale", "Fossil Peat",
@@ -38,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->startTime->setMinimumDateTime(minDateTime);
     ui->startTime->setDateTime(defaultStartTime);
     ui->endTime->setDateTime(defaultStartTime.addMonths(1));
+
 
     ui ->chooseCountryBox->clear();
     for (const QString &itemText : inDomain){
@@ -118,6 +138,10 @@ void MainWindow::on_applySettingsBtn_clicked()
     std::cout << selectedPsr.size() << std::endl;
     QString selectedDomain = ui->chooseCountryBox->currentText();
     std::cout << selectedDomain.toStdString() << std::endl;
+    QString selectedStart = ui->startTime->dateTime().toString("yyyyMMddHHmm");
+    std::cout << selectedStart.toStdString() << std::endl;
+    QString selectedEnd = ui->endTime->dateTime().toString("yyyyMMddHHmm");
+    std::cout << selectedEnd.toStdString() << std::endl;
     DataProvider DataProvider1;
 
     std::vector <double> requestData = DataProvider1.get_data("202401282200","202401282230","Fossil Brown coal", "Generation_MW","Germany","Actual generation per type", "Realised");
@@ -180,4 +204,48 @@ void MainWindow::on_downloadButton_clicked()
     // Event handling for download button
     // downloads requested data to .csv
 }
+
+
+void MainWindow::roundMinutes(QDateTimeEdit *dateTimeEdit) {
+    QTime currentTime = dateTimeEdit->time();
+    int minutes = currentTime.minute();
+
+    // Nearest 15-minute rounding
+    int roundedMinutes = (minutes + 7) / 15 * 15;
+    if (roundedMinutes >= 60) {
+        dateTimeEdit->setTime(QTime(currentTime.hour() + 1, 0));
+    } else {
+        dateTimeEdit->setTime(QTime(currentTime.hour(), roundedMinutes));
+    }
+}
+
+void MainWindow::stepByMinutes(QDateTimeEdit *dateTimeEdit, int steps) {
+    QTime currentTime = dateTimeEdit->time();
+    int minutes = currentTime.minute();
+
+    // List of valid minute values
+    QList<int> validMinutes = {0, 15, 30, 45};
+
+    // Find the current minute position in the validMinutes list
+    int index = validMinutes.indexOf(minutes);
+    if (index == -1) {
+        // If not exactly in the list (shouldn't happen after rounding), round it first
+        roundMinutes(dateTimeEdit);
+        return;
+    }
+
+    // Compute new index based on steps
+    int newIndex = index + steps;
+    if (newIndex < 0) {
+        // Move to the previous hour if stepping down past 00
+        dateTimeEdit->setTime(QTime(currentTime.hour() - 1, 45));
+    } else if (newIndex >= validMinutes.size()) {
+        // Move to the next hour if stepping up past 45
+        dateTimeEdit->setTime(QTime(currentTime.hour() + 1, 0));
+    } else {
+        // Just set the new minute value
+        dateTimeEdit->setTime(QTime(currentTime.hour(), validMinutes[newIndex]));
+    }
+}
+
 

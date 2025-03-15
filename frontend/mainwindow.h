@@ -37,6 +37,8 @@ private slots:
 
     void on_downloadButton_clicked();
 
+    QStringList getCheckedItems(QListWidget* listWidget);
+
     //void createBarPlot(std::unordered_map<)
 
 private:

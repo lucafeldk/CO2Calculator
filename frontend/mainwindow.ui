@@ -129,7 +129,7 @@
     <property name="title">
      <string>Country</string>
     </property>
-    <widget class="QFontComboBox" name="fontComboBox">
+    <widget class="QFontComboBox" name="chooseCountryBox">
      <property name="geometry">
       <rect>
        <x>20</x>

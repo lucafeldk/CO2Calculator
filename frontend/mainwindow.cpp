@@ -25,10 +25,25 @@ MainWindow::MainWindow(QWidget *parent)
         "Emitted CO2 Emissions in tons"
     };
 
+    QStringList inDomain = {
+        "Denmark",
+        "Germany"
+    };
+
+
     setupCheckBoxList(ui->listGenerationType,generationList);
     setupCheckBoxList(ui->listRequestValues,requestValues);
-    ui->plotWidget;
+    QDateTime minDateTime(QDate(2015, 1, 1), QTime(0, 0));
+    QDateTime defaultStartTime(QDate(2020,1,1), QTime(0,0));
+    ui->startTime->setMinimumDateTime(minDateTime);
+    ui->startTime->setDateTime(defaultStartTime);
+    ui->endTime->setDateTime(defaultStartTime.addMonths(1));
 
+    ui ->chooseCountryBox->clear();
+    for (const QString &itemText : inDomain){
+        ui ->chooseCountryBox->addItem(itemText);
+    }
+    ui->chooseCountryBox->setCurrentText("Germany"); // set default value
 
     // Neues QCustomPlot-Objekt erstellen
     QCustomPlot *customPlot = new QCustomPlot(this);
@@ -64,12 +79,27 @@ void MainWindow::setupCheckBoxList(QListWidget* listWidget, QStringList items){
 
     listWidget->clear();
 
-    for (const QString &itemText : items) {
-        QListWidgetItem *item = new QListWidgetItem(listWidget);
-        QCheckBox *checkBox = new QCheckBox(itemText);
-        listWidget->setItemWidget(item, checkBox);
+    // create listWidget with checkbox
+    for (const QString &itemText : items){
+        QListWidgetItem* item = new QListWidgetItem(itemText, listWidget);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // add new flag so item is checkable
+        item->setCheckState(Qt::Unchecked); //set default check state
+    }
+}
+
+QStringList MainWindow::getCheckedItems(QListWidget* listWidget){
+    QStringList checkedItems;
+
+    //iterate through items of listwidget and save checked items
+    for (int i = 0; i < listWidget->count(); ++i){
+        QListWidgetItem* item = listWidget->item(i);
+
+        if(item->checkState() == Qt::Checked){
+            checkedItems.append(item->text());
+        }
     }
 
+    return checkedItems;
 }
 
 void MainWindow::on_applySettingsBtn_clicked()
@@ -82,7 +112,14 @@ void MainWindow::on_applySettingsBtn_clicked()
 
     //Note: maybe make this a dynamic change when single parameters are edited
     //DataProvider DataProvider1;
+    QStringList selectedPsr = getCheckedItems(ui->listGenerationType);
+    std::cout << selectedPsr.size() << std::endl;
+    QStringList selectetVal = getCheckedItems((ui->listGenerationType));
+    std::cout << selectedPsr.size() << std::endl;
+    QString selectedDomain = ui->chooseCountryBox->currentText();
+    std::cout << selectedDomain.toStdString() << std::endl;
     DataProvider DataProvider1;
+
     std::vector <double> requestData = DataProvider1.get_data("202401282200","202401282230","Fossil Brown coal", "Generation_MW","Germany","Actual generation per type", "Realised");
     for (double& i :requestData){
         std::cout << std::to_string(i) << std::endl;

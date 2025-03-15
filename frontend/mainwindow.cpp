@@ -73,15 +73,13 @@ MainWindow::MainWindow(QWidget *parent)
     customPlot->setGeometry(ui->plotWidget->rect()); // Größe anpassen
 
     // Einfaches Plot-Beispiel
-    QVector<double> x(101), y(101);
-    for (int i = 0; i < 101; ++i)
-    {
-        x[i] = i / 50.0 - 1;  // x-Werte von -1 bis 1
-        y[i] = x[i] * x[i];    // Parabel-Funktion
-    }
+    QVector<double> x = {1,2,3,4,5,6};
+    QVector<double> y = {10,3,4,5,4,20};
 
-    customPlot->addGraph();
-    customPlot->graph(0)->setData(x, y);
+
+    QCPGraph *graph1 = customPlot->addGraph();
+    QCPBars *bars1 = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+    bars1->setData(x, y);
     customPlot->xAxis->setLabel("Datetime");
     customPlot->yAxis->setLabel("Generated Power in MW");
 

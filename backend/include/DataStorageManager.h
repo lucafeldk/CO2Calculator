@@ -22,7 +22,7 @@ class DataStorageManager{
                     const std::string& generationType, double generationMW, double emissiongkwh);
 
     std::vector<std::tuple<std::string, std::string, std::string, double>> fetchData();
-    std::vector<double> fetchRealData(const APIClient& Client, std::string valType);
+    std::pair<std::vector<std::string>, std::vector<double>> fetchRealData(const APIClient& Client, sqlite3* db);
     bool deleteData(const std::string& tableName);   
     bool createTable(const std::string& tableName);  
     void beginTransaction();

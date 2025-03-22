@@ -44,6 +44,8 @@ private slots:
 
     void stepByMinutes(QDateTimeEdit *dateTimeEdit, int steps);
 
+    QVector<double> toUnixVector(std::vector<std::string> timeStrings);
+
     //void createBarPlot(std::unordered_map<)
 
 private:

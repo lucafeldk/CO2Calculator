@@ -7,9 +7,9 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
     QDir::setCurrent(QCoreApplication::applicationDirPath());
     std::cout << "Current Working Directory: " << QDir::currentPath().toStdString() << std::endl;
-    QApplication a(argc, argv);
     MainWindow w;
     w.show();
     return a.exec();

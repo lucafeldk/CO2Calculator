@@ -6,7 +6,9 @@
 #include <QWidget>
 #include "DataProvider.h"
 #include <vector>
+#include <QVector>
 #include "qcustomplot.h"
+#include "unordered_map"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -32,8 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     QStringList generationList = {
-        "Generation", "Biomass", "Fossil Brown coal", "Fossil Coal-derived gas",
-        "Fossil Gas", "Fossil Hard Coal", "Fossil Oil", "Fossil Oil Shale", "Fossil Peat",
+        "Biomass", "Fossil Brown coal", "Fossil Coal-derived gas",
+        "Fossil Gas", "Fossil Hard coal", "Fossil Oil", "Fossil Peat",
         "Geothermal", "Hydro Pumped Storage", "Hydro Run-of-river and poundage",
         "Hydro Water Reservoir", "Marine", "Nuclear", "Other renewable", "Solar", "Waste",
         "Wind Offshore", "Wind Onshore", "Other", "Energy storage"
@@ -49,42 +51,19 @@ MainWindow::MainWindow(QWidget *parent)
         "Germany"
     };
 
-
     setupCheckBoxList(ui->listGenerationType,generationList);
     setupCheckBoxList(ui->listRequestValues,requestValues);
     QDateTime minDateTime(QDate(2015, 1, 1), QTime(0, 0));
     QDateTime defaultStartTime(QDate(2020,1,1), QTime(0,0));
     ui->startTime->setMinimumDateTime(minDateTime);
     ui->startTime->setDateTime(defaultStartTime);
-    ui->endTime->setDateTime(defaultStartTime.addMonths(1));
-
+    ui->endTime->setDateTime(defaultStartTime.addDays(1));
 
     ui ->chooseCountryBox->clear();
     for (const QString &itemText : inDomain){
         ui ->chooseCountryBox->addItem(itemText);
     }
     ui->chooseCountryBox->setCurrentText("Germany"); // set default value
-
-    // Neues QCustomPlot-Objekt erstellen
-    QCustomPlot *customPlot = new QCustomPlot(this);
-
-    // QCustomPlot in das vorhandene plotWidget integrieren
-    customPlot->setParent(ui->plotWidget);
-    customPlot->setGeometry(ui->plotWidget->rect()); // Größe anpassen
-
-    // Einfaches Plot-Beispiel
-    QVector<double> x = {1,2,3,4,5,6};
-    QVector<double> y = {10,3,4,5,4,20};
-
-
-    QCPGraph *graph1 = customPlot->addGraph();
-    QCPBars *bars1 = new QCPBars(customPlot->xAxis, customPlot->yAxis);
-    bars1->setData(x, y);
-    customPlot->xAxis->setLabel("Datetime");
-    customPlot->yAxis->setLabel("Generated Power in MW");
-
-    customPlot->rescaleAxes(); // Achsen anpassen
-    customPlot->replot(); // Plot zeichnen
 }
 
 MainWindow::~MainWindow()
@@ -120,45 +99,113 @@ QStringList MainWindow::getCheckedItems(QListWidget* listWidget){
     return checkedItems;
 }
 
+
 void MainWindow::on_applySettingsBtn_clicked()
 {
     // Event handling for Apply Settings Button clickend
 
-    // 1. Get_Requested Data
-    // 2. Edit Plot Graph
-    // 3. Turn Button inactive
+    std::unordered_map<QString, std::string> valConversion{
+        {"Generated Power in Megawatt", "Generation_MW"},
+        {"Emitted CO2 Emissions in tons", "CO2Emissions_gCO2eq"}
+    };
 
-    //Note: maybe make this a dynamic change when single parameters are edited
-    //DataProvider DataProvider1;
+    // read in the parameters for the request
     QStringList selectedPsr = getCheckedItems(ui->listGenerationType);
-    std::cout << selectedPsr.size() << std::endl;
-    QStringList selectetVal = getCheckedItems((ui->listGenerationType));
-    std::cout << selectedPsr.size() << std::endl;
+    QStringList selectedVal = getCheckedItems((ui->listRequestValues));
     QString selectedDomain = ui->chooseCountryBox->currentText();
-    std::cout << selectedDomain.toStdString() << std::endl;
     QString selectedStart = ui->startTime->dateTime().toString("yyyyMMddHHmm");
-    std::cout << selectedStart.toStdString() << std::endl;
     QString selectedEnd = ui->endTime->dateTime().toString("yyyyMMddHHmm");
-    std::cout << selectedEnd.toStdString() << std::endl;
-    DataProvider DataProvider1;
 
-    std::vector <double> requestData = DataProvider1.get_data("202401282200","202401282230","Fossil Brown coal", "Generation_MW","Germany","Actual generation per type", "Realised");
-    for (double& i :requestData){
-        std::cout << std::to_string(i) << std::endl;
+
+    if (!ui->plotWidget) {
+        qDebug() << "Fehler: ui->plotWidget ist NULL!";
+        return;
     }
+
+    if (!ui->plotWidget->layout()) {
+        QVBoxLayout *layout = new QVBoxLayout(ui->plotWidget);
+        ui->plotWidget->setLayout(layout);
+    }
+
+    QLayoutItem* item;
+    while ((item = ui->plotWidget->layout()->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+
+    QCustomPlot *customPlot = new QCustomPlot(this);
+    ui->plotWidget->layout()->addWidget(customPlot);
+
+    DataProvider DataProvider1;
+    std::pair<std::vector<std::string>, std::vector<double>> requestData;
+
+    // **X-Achse als Datumsformat setzen**
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    dateTicker->setDateTimeFormat("dd.MM.yyyy HH:mm");
+    dateTicker->setTickCount(5);
+    customPlot->xAxis->setTicker(dateTicker);
+
+    QCPAxisRect *topPlot = nullptr;
+    QCPAxisRect *bottomPlot = nullptr;
+    QVector<QCPGraph*> graphList;
+
+    if (selectedVal.size() == 2) {
+        customPlot->plotLayout()->clear();
+        topPlot = new QCPAxisRect(customPlot);
+        bottomPlot = new QCPAxisRect(customPlot);
+        topPlot->axis(QCPAxis::atBottom)->setTicker(dateTicker);
+        topPlot->axis(QCPAxis::atBottom)->setLabel("Date");
+        topPlot->axis(QCPAxis::atLeft)->setLabel("Generated Power in Megawatt");
+        bottomPlot->axis(QCPAxis::atBottom)->setTicker(dateTicker);
+        bottomPlot->axis(QCPAxis::atBottom)->setLabel("Date");
+        bottomPlot->axis(QCPAxis::atLeft)->setLabel("Emitted CO2 Emissions in tons");
+
+        customPlot->plotLayout()->addElement(0, 0, topPlot);
+        customPlot->plotLayout()->addElement(1, 0, bottomPlot);
+    }
+
+    for (int i = 0; i < selectedVal.size(); i++) {
+        for (QString &psrType : selectedPsr) {
+            requestData = DataProvider1.get_data(selectedStart.toStdString(), selectedEnd.toStdString(),
+                                                 psrType.toStdString(), valConversion[selectedVal[i]],
+                                                 selectedDomain.toStdString(), "Actual generation per type", "Realised");
+
+            QVector<double> xTimeStamps = toUnixVector(requestData.first);
+            QVector<double> yData(requestData.second.begin(), requestData.second.end());
+
+            QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
+            if (selectedVal.size()==2 && i == 0){ // topPlot
+                graph->setKeyAxis(topPlot->axis(QCPAxis::atBottom));
+                graph->setValueAxis(topPlot->axis(QCPAxis::atLeft));
+                graph->setData(xTimeStamps, yData);
+                graph->setLineStyle(QCPGraph::lsStepRight);
+                graphList.append(graph);
+            }
+            else if (selectedVal.size()==2 && i==1){ //bottom Plot
+                graph->setKeyAxis(bottomPlot->axis(QCPAxis::atBottom));
+                graph->setValueAxis(bottomPlot->axis(QCPAxis::atLeft));
+                graph->setData(xTimeStamps, yData);
+                graph->setLineStyle(QCPGraph::lsStepRight);
+                graphList.append(graph);
+            }
+            else{
+                graph->setData(xTimeStamps, yData);
+                graph->setLineStyle(QCPGraph::lsStepRight);
+                customPlot->yAxis->setLabel(selectedVal[i]);
+                customPlot->xAxis->setLabel("Date");
+            }
+        }
+    }
+    customPlot->rescaleAxes();
+    customPlot->replot();
+    customPlot->show();
 }
 
 
 void MainWindow::on_listGenerationType_itemClicked(QListWidgetItem *item)
 {
-    // List of Generation Type
-    // Event handling for clicking checkbox item from this List Widget
-
-    // 1. If new changes occur, turn apply settings button active
-    // 2. change request data accordingly
 
 }
-
 
 void MainWindow::on_listRequestValues_itemClicked(QListWidgetItem *item)
 {
@@ -244,6 +291,18 @@ void MainWindow::stepByMinutes(QDateTimeEdit *dateTimeEdit, int steps) {
         // Just set the new minute value
         dateTimeEdit->setTime(QTime(currentTime.hour(), validMinutes[newIndex]));
     }
+}
+
+QVector<double> MainWindow::toUnixVector(std::vector<std::string> timeStrings) {
+    QVector<double> unixTimestamps;  // Ändere den Rückgabewert zu QVector<double>
+
+    for (const std::string &timeString : timeStrings) {
+        QDateTime dateTime = QDateTime::fromString(QString::fromStdString(timeString), "yyyyMMddHHmm");
+        dateTime.setTimeZone(QTimeZone::UTC); // Falls UTC benötigt wird
+        unixTimestamps.append(static_cast<double>(dateTime.toSecsSinceEpoch())); // Umwandlung zu double
+    }
+
+    return unixTimestamps;
 }
 
 

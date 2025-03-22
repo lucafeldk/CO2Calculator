@@ -11,7 +11,7 @@ class DataProvider{
         
     public:
         bool is_data_cached(); // check if data is already cached
-        std::vector <double> get_data(const std::string& periodStart, const std::string& periodEnd,
+        std::pair<std::vector<std::string>, std::vector<double>> get_data(const std::string& periodStart, const std::string& periodEnd,
              const std::string psrType, const std::string valType, const std::string inDomain, const std::string docType, const std::string prcType); // gets Data from db or cache
 };
 

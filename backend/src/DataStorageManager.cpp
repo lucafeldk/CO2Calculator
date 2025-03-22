@@ -106,11 +106,11 @@ void DataStorageManager::commitTransaction(){
 }
 
 
-std::pair<std::vector<std::string>, std::vector<double>> DataStorageManager::fetchRealData(const APIClient& Client, sqlite3* db) {
+std::pair<std::vector<std::string>, std::vector<double>> DataStorageManager::fetchRealData(const APIClient& Client, const std::string valType) {
     std::vector<std::string> timestamps;
-    std::vector<double> generationMWs;
+    std::vector<double> valueData;
 
-    std::string query = "SELECT Timestamp, Generation_MW FROM actualData WHERE Timestamp BETWEEN ? AND ? AND Country = ? AND GenerationType = ?;";
+    std::string query = "SELECT Timestamp, "+ valType + " FROM actualData WHERE Timestamp BETWEEN ? AND ? AND Country = ? AND GenerationType = ?;";
     sqlite3_stmt* stmt;
         
     std::string periodStart = Client.get_PeriodStart();
@@ -119,7 +119,7 @@ std::pair<std::vector<std::string>, std::vector<double>> DataStorageManager::fet
     std::string generationType = Client.get_PsrType();
 
     if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
-       // Bind parameters
+       // Bind parameters      
         sqlite3_bind_text(stmt, 1, periodStart.c_str(), -1, SQLITE_STATIC);  // Timestamp (Start)
         sqlite3_bind_text(stmt, 2, periodEnd.c_str(), -1, SQLITE_STATIC);    // Timestamp (End)
         sqlite3_bind_text(stmt, 3, country.c_str(), -1, SQLITE_STATIC);      // Country
@@ -127,7 +127,7 @@ std::pair<std::vector<std::string>, std::vector<double>> DataStorageManager::fet
 
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             timestamps.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0))); // Timestamp speichern
-            generationMWs.push_back(sqlite3_column_double(stmt, 1)); // Generation_MW speichern
+            valueData.push_back(sqlite3_column_double(stmt, 1)); // Generation_MW speichern
         }
 
         sqlite3_finalize(stmt);
@@ -137,6 +137,6 @@ std::pair<std::vector<std::string>, std::vector<double>> DataStorageManager::fet
     }
 
     std::cout << "Fetched " << timestamps.size() << " rows." << std::endl;
-    return {timestamps, generationMWs}; // Rückgabe als Pair von Vektoren
+    return {timestamps, valueData}; // Rückgabe als Pair von Vektoren
 }
 

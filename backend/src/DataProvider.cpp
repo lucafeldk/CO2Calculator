@@ -13,9 +13,9 @@ bool DataProvider::is_data_cached(){
     return 0;
 }
 
-std::vector<double> DataProvider::get_data(const std::string& periodStart,const std::string& periodEnd,
+std::pair<std::vector<std::string>, std::vector<double>> DataProvider::get_data(const std::string& periodStart,const std::string& periodEnd,
     const std::string psrType,const std::string valType, const std::string inDomain, const std::string docType, const std::string prcType){
-        std::vector<double> result;
+        std::pair<std::vector<std::string>, std::vector<double>> result;
         if (!is_data_cached()){
             // if data is not in cachce
 
@@ -23,7 +23,7 @@ std::vector<double> DataProvider::get_data(const std::string& periodStart,const 
             // get the baseUrl and apikey from the config.json
 
             std::string configPath = QCoreApplication::applicationDirPath().toStdString() + "/config.json";
-            std::cout << "Trying to open config.json at: " << configPath << std::endl;
+            //std::cout << "Trying to open config.json at: " << configPath << std::endl;
             std::ifstream configFile(configPath);
             if (!configFile){
                  std::cerr << "Error:config.json file not found!" << std::endl;

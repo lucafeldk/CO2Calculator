@@ -41,13 +41,11 @@ int main() {
         {"prdStart", "202401282200"},
         {"prdEnd", "202401282230"},
     };
-    
-    std::vector<double> requestData;
+    /*
+    std::pair<std::vector<std::string>,std::vector<double>> requestData;
     DataProvider Provider;
     requestData = Provider.get_data("202401282200","202401282215","Fossil Brown coal", "Generation_MW","Germany","Actual generation per type", "Realised");
-    for (double& i :requestData){
-        std::cout << std::to_string(i) << std::endl;
-    }
+    */
     // create a first API Client 
     /*
     DataStorageManager DbManager("../database/DB_CO2Calc.db");

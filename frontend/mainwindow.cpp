@@ -48,17 +48,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     QStringList inDomain = {
         "Denmark",
-        "Germany"
+        "Germany",
+        "France"
     };
 
+    // setup the checkbox widgets
     setupCheckBoxList(ui->listGenerationType,generationList);
     setupCheckBoxList(ui->listRequestValues,requestValues);
+
+    // setup the time widgets
     QDateTime minDateTime(QDate(2015, 1, 1), QTime(0, 0));
     QDateTime defaultStartTime(QDate(2020,1,1), QTime(0,0));
     ui->startTime->setMinimumDateTime(minDateTime);
     ui->startTime->setDateTime(defaultStartTime);
     ui->endTime->setDateTime(defaultStartTime.addDays(1));
 
+    // setup the selecting country widget
     ui ->chooseCountryBox->clear();
     for (const QString &itemText : inDomain){
         ui ->chooseCountryBox->addItem(itemText);
@@ -127,15 +132,18 @@ void MainWindow::on_applySettingsBtn_clicked()
         ui->plotWidget->setLayout(layout);
     }
 
+    // delete the current data of the plot
     QLayoutItem* item;
     while ((item = ui->plotWidget->layout()->takeAt(0)) != nullptr) {
         delete item->widget();
         delete item;
     }
 
+    // Create Plot and add to widget
     QCustomPlot *customPlot = new QCustomPlot(this);
     ui->plotWidget->layout()->addWidget(customPlot);
 
+    //Data Provider for requesting the Data
     DataProvider DataProvider1;
     std::pair<std::vector<std::string>, std::vector<double>> requestData;
 
@@ -145,6 +153,7 @@ void MainWindow::on_applySettingsBtn_clicked()
     dateTicker->setTickCount(5);
     customPlot->xAxis->setTicker(dateTicker);
 
+    // Plot components
     QCPAxisRect *topPlot = nullptr;
     QCPAxisRect *bottomPlot = nullptr;
     QVector<QCPGraph*> graphList;
@@ -164,6 +173,7 @@ void MainWindow::on_applySettingsBtn_clicked()
         customPlot->plotLayout()->addElement(1, 0, bottomPlot);
     }
 
+    // Plotting the Data
     for (int i = 0; i < selectedVal.size(); i++) {
         for (QString &psrType : selectedPsr) {
             requestData = DataProvider1.get_data(selectedStart.toStdString(), selectedEnd.toStdString(),

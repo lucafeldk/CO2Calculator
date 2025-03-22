@@ -5,6 +5,8 @@
 #include <pugixml.hpp>
 #include <iostream>
 #include <future>
+#include <QCoreApplication>
+#include <cmath> 
 
 APIClient::APIClient(const std::string& base, const std::string& apiKey){
     //Initialising the API Client
@@ -47,32 +49,72 @@ void APIClient::config_request(std::unordered_map<std::string, std::string>& par
 void APIClient::get_request(std::unordered_map<std::string,  std::string>& parameter){
     // configure request parameter of current object
     config_request(parameter);
-
+    std::chrono::hours maxRequestDays = std::chrono::hours(24 * 365);
+    auto duration = std::chrono::duration_cast<std::chrono::hours>(string_to_chrono(periodEnd) - string_to_chrono(periodStart));
+    std::cout << "Tage requested:" << duration.count() << std::endl;
     
-    // api get request via cpr
-    cpr::Response response = cpr::Get(
-        cpr::Url{requestUrl},
-        cpr::Header{{"Accept-Encoding", "gzip"}}
-    );
-    
-    // Error handling for the get request
-    if (response.error) {
-        throw std::runtime_error("Network error: " + response.error.message);
+    // if the day limit is execceded for single request, split the request (Daylimit = 370 days)
+    std::vector<std::pair<std::string, std::string>> timeRanges;
+    if (duration.count()>24*365){
+        double temp = static_cast<double>(duration.count())/(24*365);
+        int parts =static_cast<int>(std::ceil(temp));
+        std::cout << "Duration is higher then 365 days cut into " << temp << " parts" <<  std::endl;
+        timeRanges = split_time_range(periodStart, periodEnd, parts);
     }
+    
+    // Make request to Entsoe API
+    cpr::Response response;
+    if (!timeRanges.empty()){
+        // multiple requests
+        std::string tempPeriodStart = periodStart;
+        std::string tempPeriodEnd = periodEnd;
+        for (std::pair<std::string, std::string> &timeRange:timeRanges){
+            //single request is possible
+            parameter["prdStart"] = timeRange.first;
+            parameter["prdEnd"] = timeRange.second;
+            config_request(parameter);
+            std::cout << "Start:" << periodStart << std::endl;
+            std::cout << "End: " << periodEnd << std::endl;
+            response = cpr::Get(
+                cpr::Url{requestUrl},
+                cpr::Header{{"Accept-Encoding", "gzip"}}
+            );
 
-    if (response.status_code != 200) {
-        throw std::runtime_error("HTTP error: Status code " + std::to_string(response.status_code) +
+            // Error handling for the get request
+            if (response.error) {
+                throw std::runtime_error("Network error: " + response.error.message);
+            }
+
+            if (response.status_code != 200) {
+                throw std::runtime_error("HTTP error: Status code " + std::to_string(response.status_code) +
                                  " - " + response.text);
+            }
+            // call xml_parser to handle the xml response message
+            xml_parser(response);
+            }
+        parameter["prdStart"] = tempPeriodStart;
+        parameter["prdEnd"] = tempPeriodEnd;
+        config_request(parameter);
     }
+    else{
+        //single request is possible
+        response = cpr::Get(
+            cpr::Url{requestUrl},
+            cpr::Header{{"Accept-Encoding", "gzip"}}
+        );
 
-    //Print out Information from the response
-    std::cout << "Status Code: " << response.status_code << std::endl;
-    //std::cout << "Response Headers: " << response.header["Content-Encoding"] << std::endl;
-    //std::cout << "Response:" << response.text << std::endl;
-    
-    // call xml_parser to handle the xml response message
-    xml_parser(response);
+        // Error handling for the get request
+        if (response.error) {
+            throw std::runtime_error("Network error: " + response.error.message);
+        }
 
+        if (response.status_code != 200) {
+            throw std::runtime_error("HTTP error: Status code " + std::to_string(response.status_code) +
+                                 " - " + response.text);
+        }
+         // call xml_parser to handle the xml response message
+        xml_parser(response);
+    }
 }
 
 
@@ -95,7 +137,9 @@ void APIClient::xml_parser(cpr::Response& response){
     std::chrono::system_clock::time_point timestamp = string_to_chrono(periodStart);
     //create database manager object and insert data into db
     //endDate not included, eg 22:00-23:00, 23:00 is not included meaning data from 22:00-22:45
-    DataStorageManager dbManager("../database/DB_CO2Calc.db");
+    std::string dbPath = QCoreApplication::applicationDirPath().toStdString() + "/database/DB_CO2Calc.db";
+    std::cout << "Trying to write database at: " << dbPath << std::endl;
+    DataStorageManager dbManager(dbPath);
     CO2Calculator CO2Calc;
 
     dbManager.beginTransaction(); //ensures batch insert

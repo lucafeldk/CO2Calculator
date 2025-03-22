@@ -28,6 +28,6 @@ CO2Calculator::CO2Calculator(){
 
 double CO2Calculator::calcCO2(double power, std::string& psrType){
     // Acutal CO2eq Emmissions per type, 15-minute Intervall values [gCO2eq/kwh]
-    // emissionPerType[gCO2eq] = power[kw] * timeIntervall[h] * emissionfactor [gCO2eq/kwh]
-    return (power*1000*0.25*emissionFactor[psrType]);
+    // emissionPerType[tCO2eq] = power[kw] * timeIntervall[h] * emissionfactor [gCO2eq/kwh]*1e-6
+    return ((power*1000*0.25*emissionFactor[psrType])/1000000);
 }

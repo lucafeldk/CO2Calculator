@@ -112,7 +112,7 @@ std::pair<std::vector<std::string>, std::vector<double>> DataStorageManager::fet
 
     std::string query = "SELECT Timestamp, "+ valType + " FROM actualData WHERE Timestamp BETWEEN ? AND ? AND Country = ? AND GenerationType = ?;";
     sqlite3_stmt* stmt;
-        
+    
     std::string periodStart = Client.get_PeriodStart();
     std::string periodEnd = Client.get_PeriodEnd();
     std::string country = Client.get_InDomain();

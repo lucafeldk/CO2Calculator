@@ -79,7 +79,6 @@ void APIClient::get_request(std::unordered_map<std::string,  std::string>& param
                 cpr::Url{requestUrl},
                 cpr::Header{{"Accept-Encoding", "gzip"}}
             );
-
             // Error handling for the get request
             if (response.error) {
                 throw std::runtime_error("Network error: " + response.error.message);

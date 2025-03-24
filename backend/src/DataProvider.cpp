@@ -49,7 +49,7 @@ std::pair<std::vector<std::string>, std::vector<double>> DataProvider::get_data(
             
             // setup connection to database and fetch data from data base
             std::string dbPath = QCoreApplication::applicationDirPath().toStdString() + "/database/DB_CO2Calc.db";
-            std::cout << "Trying to open database at: " << dbPath << std::endl;
+            //std::cout << "Trying to open database at: " << dbPath << std::endl;
             DataStorageManager DbManager(dbPath);
             result = DbManager.fetchRealData(Client, valType);
 

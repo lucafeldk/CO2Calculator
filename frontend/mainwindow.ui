@@ -200,32 +200,6 @@
        <height>581</height>
       </rect>
      </property>
-     <widget class="QPushButton" name="downloadButton">
-      <property name="geometry">
-       <rect>
-        <x>780</x>
-        <y>90</y>
-        <width>51</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Down</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="screenshotBtn">
-      <property name="geometry">
-       <rect>
-        <x>780</x>
-        <y>20</y>
-        <width>51</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Screen</string>
-      </property>
-     </widget>
     </widget>
    </widget>
   </widget>

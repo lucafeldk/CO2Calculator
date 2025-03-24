@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
         stepByMinutes(ui->endTime, steps);
     });
 
+    // setup necessary string list for the list widget
     QStringList generationList = {
         "Biomass", "Fossil Brown coal", "Fossil Coal-derived gas",
         "Fossil Gas", "Fossil Hard coal", "Fossil Oil", "Fossil Peat",
@@ -108,7 +109,7 @@ QStringList MainWindow::getCheckedItems(QListWidget* listWidget){
 }
 
 void MainWindow::paintItem(QListWidget* listWidget, QString itemValue, QColor paintColor){
-    // iterate through checked items and set the color to the corresponding graph line color
+    // paint Item in Color of graph line
         QList<QListWidgetItem*> items = listWidget->findItems(itemValue, Qt::MatchExactly);
         if (!items.isEmpty()) {
             QListWidgetItem* item = items.first();
@@ -125,16 +126,22 @@ void MainWindow::paintItem(QListWidget* listWidget, QString itemValue, QColor pa
 
 void MainWindow::on_applySettingsBtn_clicked()
 {
+    // Conversion values for frontend->backend translation
     std::unordered_map<QString, std::string> valConversion{
         {"Generated Power in Megawatt", "Generation_MW"},
         {"Emitted CO2 Emissions in tons", "CO2Emissions_gCO2eq"}
     };
 
+    // String for Data Request
     QStringList selectedPsr = getCheckedItems(ui->listGenerationType);
     QStringList selectedVal = getCheckedItems((ui->listRequestValues));
     QString selectedDomain = ui->chooseCountryBox->currentText();
     QString selectedStart = ui->startTime->dateTime().toString("yyyyMMddHHmm");
     QString selectedEnd = ui->endTime->dateTime().toString("yyyyMMddHHmm");
+
+    // Initiliase provider for access to data
+    DataProvider DataProvider1;
+    std::pair<std::vector<std::string>, std::vector<double>> requestData;
 
     if (!ui->plotWidget) {
         qDebug() << "Fehler: ui->plotWidget ist NULL!";
@@ -161,9 +168,6 @@ void MainWindow::on_applySettingsBtn_clicked()
 
     QCustomPlot *customPlot = new QCustomPlot(this);
     ui->plotWidget->layout()->addWidget(customPlot);
-
-    DataProvider DataProvider1;
-    std::pair<std::vector<std::string>, std::vector<double>> requestData;
 
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("dd.MM.yyyy HH:mm");
@@ -195,6 +199,7 @@ void MainWindow::on_applySettingsBtn_clicked()
             customPlot->yAxis->setLabel(selectedVal[0]);
     }
 
+    //Requesting and plotting data
     for (int i = 0; i < selectedVal.size(); i++) {
         for (int j = 0; j < selectedPsr.size(); j++) {
             requestData = DataProvider1.get_data(
@@ -228,8 +233,8 @@ void MainWindow::on_applySettingsBtn_clicked()
         }
     }
 
-    // Rescale properly and apply nullpunkt fix
-    customPlot->rescaleAxes(); // makes sure ranges are initialized
+    // Rescale properly and apply zero point for yAxis
+    customPlot->rescaleAxes();
 
     if (selectedVal.size() == 2) {
         if (topPlot) {
@@ -249,62 +254,11 @@ void MainWindow::on_applySettingsBtn_clicked()
     customPlot->show();
 }
 
-
-
-void MainWindow::on_listGenerationType_itemClicked(QListWidgetItem *item)
-{
-
-}
-
-void MainWindow::on_listRequestValues_itemClicked(QListWidgetItem *item)
-{
-    // List of Requested Values
-    // Event handling for clicking checkbox item from this List Widget
-
-    // 1. If new changes occur, turn apply settings button active
-    // 2. change request data accordingly
-}
-
-
-void MainWindow::on_fontComboBox_currentTextChanged(const QString &arg1)
-{
-    // Event handling for country change
-}
-
-
-void MainWindow::on_startTime_dateTimeChanged(const QDateTime &dateTime)
-{
-    // Event handling for changing the starttime
-    // Starttime can't exceed the endtime
-}
-
-
-void MainWindow::on_endTime_dateTimeChanged(const QDateTime &dateTime)
-{
-    // Event handling for changing the endtime
-    // Endtime cannot fall below the startime
-}
-
-
-void MainWindow::on_screenshotBtn_clicked()
-{
-    // Event handling for screenshot button
-    // Saves plot to img file
-}
-
-
-void MainWindow::on_downloadButton_clicked()
-{
-    // Event handling for download button
-    // downloads requested data to .csv
-}
-
-
 void MainWindow::roundMinutes(QDateTimeEdit *dateTimeEdit) {
+    // round entered time to 15-minute intervalls
     QTime currentTime = dateTimeEdit->time();
     int minutes = currentTime.minute();
 
-    // Nearest 15-minute rounding
     int roundedMinutes = (minutes + 7) / 15 * 15;
     if (roundedMinutes >= 60) {
         dateTimeEdit->setTime(QTime(currentTime.hour() + 1, 0));
@@ -314,16 +268,15 @@ void MainWindow::roundMinutes(QDateTimeEdit *dateTimeEdit) {
 }
 
 void MainWindow::stepByMinutes(QDateTimeEdit *dateTimeEdit, int steps) {
+    // creating custom stepBy function for dataTimeEdit Widget
     QTime currentTime = dateTimeEdit->time();
     int minutes = currentTime.minute();
-
-    // List of valid minute values
     QList<int> validMinutes = {0, 15, 30, 45};
 
     // Find the current minute position in the validMinutes list
     int index = validMinutes.indexOf(minutes);
     if (index == -1) {
-        // If not exactly in the list (shouldn't happen after rounding), round it first
+        // If not exactly in the list, round it first
         roundMinutes(dateTimeEdit);
         return;
     }
@@ -343,20 +296,20 @@ void MainWindow::stepByMinutes(QDateTimeEdit *dateTimeEdit, int steps) {
 }
 
 QVector<double> MainWindow::toUnixVector(std::vector<std::string> timeStrings) {
-    QVector<double> unixTimestamps;  // Ändere den Rückgabewert zu QVector<double>
+    // Conversion to unix double time stamps for qcustomplots
+    QVector<double> unixTimestamps;
 
     for (const std::string &timeString : timeStrings) {
         QDateTime dateTime = QDateTime::fromString(QString::fromStdString(timeString), "yyyyMMddHHmm");
         dateTime.setTimeZone(QTimeZone::UTC); // Falls UTC benötigt wird
-        unixTimestamps.append(static_cast<double>(dateTime.toSecsSinceEpoch())); // Umwandlung zu double
+        unixTimestamps.append(static_cast<double>(dateTime.toSecsSinceEpoch()));
     }
 
     return unixTimestamps;
 }
 
-
-
 QColor MainWindow::getColor(int pos) {
+    // List of Colors for plotting
     QVector<QColor> colors = {
         QColor(255, 0, 0),      // Red
         QColor(0, 255, 0),      // Green

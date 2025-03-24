@@ -46,6 +46,10 @@ private slots:
 
     QVector<double> toUnixVector(std::vector<std::string> timeStrings);
 
+    QColor getColor(int pos);
+
+    void paintItem(QListWidget* listWidget, QString itemValue, QColor paintColor);
+
     //void createBarPlot(std::unordered_map<)
 
 private:

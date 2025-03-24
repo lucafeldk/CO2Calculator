@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //Window title
+    setWindowTitle("CO2 Calculator");
+
     // Ensure startTime and endTime step by 15-minute intervals
     connect(ui->startTime, &QDateTimeEdit::editingFinished, this, [=]() {
         roundMinutes(ui->startTime);
@@ -104,23 +107,34 @@ QStringList MainWindow::getCheckedItems(QListWidget* listWidget){
     return checkedItems;
 }
 
+void MainWindow::paintItem(QListWidget* listWidget, QString itemValue, QColor paintColor){
+    // iterate through checked items and set the color to the corresponding graph line color
+        QList<QListWidgetItem*> items = listWidget->findItems(itemValue, Qt::MatchExactly);
+        if (!items.isEmpty()) {
+            QListWidgetItem* item = items.first();
+            item->setBackground(paintColor);
+        }
+        else{
+            qDebug() << "Item not found!";
+            return;
+        }
+
+    return;
+}
+
 
 void MainWindow::on_applySettingsBtn_clicked()
 {
-    // Event handling for Apply Settings Button clickend
-
     std::unordered_map<QString, std::string> valConversion{
         {"Generated Power in Megawatt", "Generation_MW"},
         {"Emitted CO2 Emissions in tons", "CO2Emissions_gCO2eq"}
     };
 
-    // read in the parameters for the request
     QStringList selectedPsr = getCheckedItems(ui->listGenerationType);
     QStringList selectedVal = getCheckedItems((ui->listRequestValues));
     QString selectedDomain = ui->chooseCountryBox->currentText();
     QString selectedStart = ui->startTime->dateTime().toString("yyyyMMddHHmm");
     QString selectedEnd = ui->endTime->dateTime().toString("yyyyMMddHHmm");
-
 
     if (!ui->plotWidget) {
         qDebug() << "Fehler: ui->plotWidget ist NULL!";
@@ -132,28 +146,29 @@ void MainWindow::on_applySettingsBtn_clicked()
         ui->plotWidget->setLayout(layout);
     }
 
-    // delete the current data of the plot
+    // delete existing plot
     QLayoutItem* item;
     while ((item = ui->plotWidget->layout()->takeAt(0)) != nullptr) {
         delete item->widget();
         delete item;
     }
 
-    // Create Plot and add to widget
+    // reset color highlighting
+    for (int i = 0; i < ui->listGenerationType->count(); ++i) {
+        QListWidgetItem* item = ui->listGenerationType->item(i);
+        item->setBackground(QBrush());
+    }
+
     QCustomPlot *customPlot = new QCustomPlot(this);
     ui->plotWidget->layout()->addWidget(customPlot);
 
-    //Data Provider for requesting the Data
     DataProvider DataProvider1;
     std::pair<std::vector<std::string>, std::vector<double>> requestData;
 
-    // **X-Achse als Datumsformat setzen**
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("dd.MM.yyyy HH:mm");
     dateTicker->setTickCount(5);
-    customPlot->xAxis->setTicker(dateTicker);
 
-    // Plot components
     QCPAxisRect *topPlot = nullptr;
     QCPAxisRect *bottomPlot = nullptr;
     QVector<QCPGraph*> graphList;
@@ -162,54 +177,78 @@ void MainWindow::on_applySettingsBtn_clicked()
         customPlot->plotLayout()->clear();
         topPlot = new QCPAxisRect(customPlot);
         bottomPlot = new QCPAxisRect(customPlot);
+
         topPlot->axis(QCPAxis::atBottom)->setTicker(dateTicker);
         topPlot->axis(QCPAxis::atBottom)->setLabel("Date");
         topPlot->axis(QCPAxis::atLeft)->setLabel("Generated Power in Megawatt");
+
         bottomPlot->axis(QCPAxis::atBottom)->setTicker(dateTicker);
         bottomPlot->axis(QCPAxis::atBottom)->setLabel("Date");
         bottomPlot->axis(QCPAxis::atLeft)->setLabel("Emitted CO2 Emissions in tons");
 
         customPlot->plotLayout()->addElement(0, 0, topPlot);
         customPlot->plotLayout()->addElement(1, 0, bottomPlot);
+    } else {
+        customPlot->xAxis->setTicker(dateTicker);
+        customPlot->xAxis->setLabel("Date");
+        if (!selectedVal.isEmpty())
+            customPlot->yAxis->setLabel(selectedVal[0]);
     }
 
-    // Plotting the Data
     for (int i = 0; i < selectedVal.size(); i++) {
-        for (QString &psrType : selectedPsr) {
-            requestData = DataProvider1.get_data(selectedStart.toStdString(), selectedEnd.toStdString(),
-                                                 psrType.toStdString(), valConversion[selectedVal[i]],
-                                                 selectedDomain.toStdString(), "Actual generation per type", "Realised");
+        for (int j = 0; j < selectedPsr.size(); j++) {
+            requestData = DataProvider1.get_data(
+                selectedStart.toStdString(), selectedEnd.toStdString(),
+                selectedPsr[j].toStdString(), valConversion[selectedVal[i]],
+                selectedDomain.toStdString(), "Actual generation per type", "Realised");
 
             QVector<double> xTimeStamps = toUnixVector(requestData.first);
             QVector<double> yData(requestData.second.begin(), requestData.second.end());
 
-            QCPGraph *graph = new QCPGraph(customPlot->xAxis, customPlot->yAxis);
-            if (selectedVal.size()==2 && i == 0){ // topPlot
-                graph->setKeyAxis(topPlot->axis(QCPAxis::atBottom));
-                graph->setValueAxis(topPlot->axis(QCPAxis::atLeft));
-                graph->setData(xTimeStamps, yData);
-                graph->setLineStyle(QCPGraph::lsStepRight);
-                graphList.append(graph);
+            QCPGraph *graph = nullptr;
+            QColor graphColor = getColor(j);
+
+            if (selectedVal.size() == 2) {
+                if (i == 0 && topPlot) {
+                    graph = customPlot->addGraph(topPlot->axis(QCPAxis::atBottom), topPlot->axis(QCPAxis::atLeft));
+                } else if (i == 1 && bottomPlot) {
+                    graph = customPlot->addGraph(bottomPlot->axis(QCPAxis::atBottom), bottomPlot->axis(QCPAxis::atLeft));
+                }
+            } else {
+                graph = customPlot->addGraph(customPlot->xAxis, customPlot->yAxis);
             }
-            else if (selectedVal.size()==2 && i==1){ //bottom Plot
-                graph->setKeyAxis(bottomPlot->axis(QCPAxis::atBottom));
-                graph->setValueAxis(bottomPlot->axis(QCPAxis::atLeft));
+
+            if (graph) {
                 graph->setData(xTimeStamps, yData);
                 graph->setLineStyle(QCPGraph::lsStepRight);
+                graph->setPen(QPen(graphColor));
                 graphList.append(graph);
-            }
-            else{
-                graph->setData(xTimeStamps, yData);
-                graph->setLineStyle(QCPGraph::lsStepRight);
-                customPlot->yAxis->setLabel(selectedVal[i]);
-                customPlot->xAxis->setLabel("Date");
+                paintItem(ui->listGenerationType, selectedPsr[j], graphColor);
             }
         }
     }
-    customPlot->rescaleAxes();
+
+    // Rescale properly and apply nullpunkt fix
+    customPlot->rescaleAxes(); // makes sure ranges are initialized
+
+    if (selectedVal.size() == 2) {
+        if (topPlot) {
+            QCPRange range = topPlot->axis(QCPAxis::atLeft)->range();
+            topPlot->axis(QCPAxis::atLeft)->setRange(qMin(0.0, range.lower), range.upper);
+        }
+        if (bottomPlot) {
+            QCPRange range = bottomPlot->axis(QCPAxis::atLeft)->range();
+            bottomPlot->axis(QCPAxis::atLeft)->setRange(qMin(0.0, range.lower), range.upper);
+        }
+    } else {
+        QCPRange range = customPlot->yAxis->range();
+        customPlot->yAxis->setRange(qMin(0.0, range.lower), range.upper);
+    }
+
     customPlot->replot();
     customPlot->show();
 }
+
 
 
 void MainWindow::on_listGenerationType_itemClicked(QListWidgetItem *item)
@@ -315,4 +354,31 @@ QVector<double> MainWindow::toUnixVector(std::vector<std::string> timeStrings) {
     return unixTimestamps;
 }
 
+
+
+QColor MainWindow::getColor(int pos) {
+    QVector<QColor> colors = {
+        QColor(255, 0, 0),      // Red
+        QColor(0, 255, 0),      // Green
+        QColor(0, 0, 255),      // Blue
+        QColor(255, 255, 0),    // Yellow
+        QColor(255, 165, 0),    // Orange
+        QColor(128, 0, 128),    // Purple
+        QColor(0, 255, 255),    // Cyan
+        QColor(255, 192, 203),  // Pink
+        QColor(165, 42, 42),    // Brown
+        QColor(128, 128, 128),  // Gray
+        QColor(0, 128, 0),      // DarkGreen
+        QColor(0, 0, 128),      // Navy
+        QColor(255, 105, 180),  // HotPink
+        QColor(255, 215, 0),    // Gold
+        QColor(0, 191, 255),    // DeepSkyBlue
+        QColor(124, 252, 0),    // LawnGreen
+        QColor(255, 140, 0),    // DarkOrange
+        QColor(60, 179, 113),   // MediumSeaGreen
+        QColor(138, 43, 226),   // BlueViolet
+        QColor(255, 99, 71)     // Tomato
+    };
+    return colors[pos];
+}
 

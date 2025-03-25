@@ -4,13 +4,15 @@ A tool for visualizing electricity generation emissions based on ENTSO-E data.
 
 ---
 
-## Getting Started - Release 1.0.0
+## 🛠️ Getting Started - Release 1.0.0
 You can try the release. The functionality is still very rudementary. If you want to try nonetheless follow the steps below.
 
 1. Download and extract the ZIP archive.
-2. Copy `config.json.example` and rename it to `config.json`.
+2. Copy `config_example.json` and rename it to `config.json`.
 3. Enter your **ENTSO-E API key** (see below).
-4. Launch `CO2Calculator_Frontend.exe`.
+4. Launch `CO2Calculator.exe`.
+
+[🔽 Download ZIP](https://github.com/lucafeldk/CO2Calculator/releases/download/v1.0.0/CO2Calculator_v1.0.0_Windows.zip)
 
 ---
 
@@ -21,7 +23,7 @@ You can try the release. The functionality is still very rudementary. If you wan
 3. Under your account, request an API key for the ENTSO-E Transparency Platform.
 4. The key will be sent to you via email.
 
-💡 Activation may take 1–2 business days.
+💡 Activation may take up 1–2 business days. But my key i got after in a few hours after the request.
 
 ---
 

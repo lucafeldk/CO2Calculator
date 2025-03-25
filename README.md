@@ -1,10 +1,10 @@
 
-# ⚡ CO2Calculator 
+# CO2Calculator 
 A tool for visualizing electricity generation emissions based on ENTSO-E data.
 
 ---
 
-## 🛠️ Getting Started - Release 1.0.0
+## Getting Started - Release 1.0.0
 You can try the release. The functionality is still very rudementary. If you want to try nonetheless follow the steps below.
 
 1. Download and extract the ZIP archive.
@@ -16,7 +16,7 @@ You can try the release. The functionality is still very rudementary. If you wan
 
 ---
 
-## 🔑 How to Get an ENTSO-E API Key
+## How to Get an ENTSO-E API Key
 
 1. Visit: https://www.entsoe.eu
 2. Create a free user account.
@@ -27,7 +27,7 @@ You can try the release. The functionality is still very rudementary. If you wan
 
 ---
 
-## 🧾 Sample `config.json`
+## Sample `config.json`
 
 ```json
 {

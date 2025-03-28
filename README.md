@@ -1,6 +1,32 @@
 
 # CO2Calculator 
-A tool for visualizing electricity generation emissions based on ENTSO-E data.
+CO2-Emissions are the main cause of man-made climate change. The biggest amount of  CO2 emis-sions in the world are emitted through the production of electricity. Per produced kilowatt-hour a certain amount of gram CO2 is emitted. This tool aims to visualize these emissions based on ENTSO-E data.
+
+## CO2 Emissionsfactor per Production Type
+Every prodcution emmits a different amount of CO2 per kwh. Obvisouly fossil Energy sources like brown coal, hard coal or oil emitts more CO2 than greener alternatives like Wind or Solar Energy. The ENTSO-E Transperency Platform provides for each energy production type the amount of power that is generated in an 15-minute Intervall. If you assign each of this production type an emmisionfactor you calculate the emission per production type:
+
+| Code | Energietyp                             | emssionfactor in gCO2eq/kwH< |
+|------|----------------------------------------|-------------|
+| B01  | Biomass                                | 266,8       |
+| B02  | Lignite Coal                           | 1209,9      |
+| B03  | Coal-derived gas                       | 952         |
+| B04  | Fossil Gas                             | 467,4       |
+| B05  | Hard coal                              | 1051,5      |
+| B06  | Oil                                    | 890         |
+| B07  | Oil shale                              | 0,0         |
+| B08  | Fossil Peat                            | 0,0         |
+| B09  | Geothermal                             | 182,6       |
+| B10  | Hydro Pumped Storage                   | 25,1        |
+| B11  | Hydro Run-of-river and poundage       | 2,7         |
+| B12  | Hydro Water Reservoir                  | 25,1        |
+| B13  | Marine                                 | 0,0         |
+| B14  | Nuclear                                | 32          |
+| B15  | Other renewable                        | 93          |
+| B16  | Solar                                  | 66,7        |
+| B17  | Waste                                  | 266,8       |
+| B18  | Wind Offshore                          | 10,5        |
+| B19  | Wind Onshore                           | 6           |
+| B20  | Other                                  | 683,8       |
 
 ---
 

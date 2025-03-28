@@ -13,13 +13,13 @@ Every energy prodcution type emmits a different amount of CO2 per kwh. Obviously
 | B04  | Fossil Gas                             | 467,4       |
 | B05  | Hard coal                              | 1051,5      |
 | B06  | Oil                                    | 890         |
-| B07  | Oil shale                              | 0,0         |
-| B08  | Fossil Peat                            | 0,0         |
+| B07  | Oil shale                              | N/A        |
+| B08  | Fossil Peat                            | N/A         |
 | B09  | Geothermal                             | 182,6       |
 | B10  | Hydro Pumped Storage                   | 25,1        |
 | B11  | Hydro Run-of-river and poundage       | 2,7         |
 | B12  | Hydro Water Reservoir                  | 25,1        |
-| B13  | Marine                                 | 0,0         |
+| B13  | Marine                                 | N/A        |
 | B14  | Nuclear                                | 32          |
 | B15  | Other renewable                        | 93          |
 | B16  | Solar                                  | 66,7        |

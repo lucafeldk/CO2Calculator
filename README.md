@@ -3,7 +3,7 @@
 CO2-Emissions are the main cause of man-made climate change. The biggest amount of  CO2 emissions in the world are emitted through the production of electricity. Per produced kilowatt-hour a certain amount of gram CO2 is emitted. This tool aims to visualize these emissions based on ENTSO-E data.
 
 ## CO2 Emissionsfactor per Production Type
-Every energy prodcution type emmits a different amount of CO2 per kwh. Obviously fossil Energy sources like brown coal, hard coal or oil emitts more CO2 than greener alternatives like Wind or Solar Energy. The [ENTSO-E Transperency Platform](https://transparency.entsoe.eu/) provides for each energy production type the amount of power that is generated in an 15-minute Intervall. If you assign each of this production type an emmisionfactor you calculate the emission per production type:
+Every energy prodcution type emmits a different amount of CO2 per kwh. Obviously fossil Energy sources like brown coal, hard coal or oil emitts more CO2 than greener alternatives like Wind or Solar Energy. The [ENTSO-E Transperency Platform](https://transparency.entsoe.eu/) provides for each energy production type the amount of power that is generated in an 15-minute Intervall. If you assign each of this production types an emmisionfactor you are able to calculate the emission per production type:
 
 | Code | Energietyp                             | emssionfactor in gCO2eq/kwH |
 |------|----------------------------------------|-------------|

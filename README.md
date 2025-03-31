@@ -28,6 +28,10 @@ Every energy prodcution type emmits a different amount of CO2 per kwh. Obviously
 | B19  | Wind Onshore                           | 6           |
 | B20  | Other                                  | 683,8       |
 
+
+## Screenshot
+![Image](https://github.com/user-attachments/assets/8fbb1669-6435-43af-8779-b1967c5861c3)
+
 ---
 
 ## Getting Started - Release 1.0.0

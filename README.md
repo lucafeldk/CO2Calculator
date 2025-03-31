@@ -29,7 +29,8 @@ Every energy prodcution type emmits a different amount of CO2 per kwh. Obviously
 | B20  | Other                                  | 683,8       |
 
 
-## Screenshot
+## About the App
+The desktop App is coded in C++ and at the moment uses a simple gui created with the qt framework. The App creates makes depending on the gui request settings a http request call to API of the ENTSO-E Platform. With the data of the generated Power of the chosen production types the corresponding CO2 Emission in tons are calculated based on the table above. After this the data will be stored in a sqllite database and can be fetched from the frontend. Here is the Screenshot thats shows the Visualization of the production types Fossil Brown Coal and Fossil Gas for a few days:
 ![Image](https://github.com/user-attachments/assets/8fbb1669-6435-43af-8779-b1967c5861c3)
 
 ---

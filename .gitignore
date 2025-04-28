@@ -36,6 +36,7 @@ backend/.vscode/*
 backend/database/*
 backend/build/
 /build/
+/build-release
 .vscode
 
 #FilesS

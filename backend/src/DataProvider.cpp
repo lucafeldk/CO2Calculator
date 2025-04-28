@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <QCoreApplication>
+#include <vector>
 
 
 bool DataProvider::is_data_cached(){
@@ -21,7 +22,6 @@ std::pair<std::vector<std::string>, std::vector<double>> DataProvider::get_data(
 
             // check if config.json exists
             // get the baseUrl and apikey from the config.json
-
             std::string configPath = QCoreApplication::applicationDirPath().toStdString() + "/config.json";
             //std::cout << "Trying to open config.json at: " << configPath << std::endl;
             std::ifstream configFile(configPath);
@@ -45,12 +45,21 @@ std::pair<std::vector<std::string>, std::vector<double>> DataProvider::get_data(
                 {"prdStart", periodStart},
                 {"prdEnd", periodEnd},
             };
-            Client.get_request(requestParams);
-            
+
             // setup connection to database and fetch data from data base
             std::string dbPath = QCoreApplication::applicationDirPath().toStdString() + "/database/DB_CO2Calc.db";
-            //std::cout << "Trying to open database at: " << dbPath << std::endl;
             DataStorageManager DbManager(dbPath);
+
+            std::vector<std::string> listTimes = {requestParams["prdStart"]};
+            std::chrono::_V2::system_clock::time_point tempChrono = APIClient::string_to_chrono(requestParams["prdStart"]);
+            std::string timeString = requestParams["prdStart"];
+            while (timeString != requestParams["prdEnd"] ){
+                tempChrono += std::chrono::minutes(15);
+                listTimes.emplace_back(APIClient::chrono_to_string(tempChrono));
+            }
+            //listTimes.emplace_back(requestParams["prdEnd"]);
+            // request data and fetch it from database
+            Client.get_request(requestParams);
             result = DbManager.fetchRealData(Client, valType);
 
             return result;

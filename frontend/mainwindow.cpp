@@ -61,11 +61,17 @@ MainWindow::MainWindow(QWidget *parent)
     setupCheckBoxList(ui->listRequestValues,requestValues);
 
     // setup the time widgets
+    // set max time based on current time
+    updateMaxTime();
+    QTimer *maxTimeUpdater = new QTimer(this);
+    connect(maxTimeUpdater, &QTimer::timeout, this, &MainWindow::updateMaxTime);
+    maxTimeUpdater->start(60 * 1000);
     QDateTime minDateTime(QDate(2015, 1, 1), QTime(0, 0));
     QDateTime defaultStartTime(QDate(2020,1,1), QTime(0,0));
     ui->startTime->setMinimumDateTime(minDateTime);
     ui->startTime->setDateTime(defaultStartTime);
     ui->endTime->setDateTime(defaultStartTime.addDays(1));
+    ui->endTime->setMinimumDateTime(minDateTime);
 
     // setup the selecting country widget
     ui ->chooseCountryBox->clear();
@@ -306,6 +312,20 @@ QVector<double> MainWindow::toUnixVector(std::vector<std::string> timeStrings) {
     }
 
     return unixTimestamps;
+}
+
+void MainWindow::updateMaxTime() {
+    QDateTime maxAllowed = QDateTime::currentDateTimeUtc().addSecs(-3600);
+
+    // temporary datetime for rounding
+    QDateTimeEdit temp;
+    temp.setDateTime(maxAllowed);
+    roundMinutes(&temp);
+    maxAllowed = temp.dateTime();
+
+    // set maximum
+    ui->startTime->setMaximumDateTime(maxAllowed);
+    ui->endTime->setMaximumDateTime(maxAllowed);
 }
 
 QColor MainWindow::getColor(int pos) {

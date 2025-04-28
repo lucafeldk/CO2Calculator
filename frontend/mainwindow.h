@@ -24,20 +24,6 @@ public:
 private slots:
     void on_applySettingsBtn_clicked();
 
-    void on_listGenerationType_itemClicked(QListWidgetItem *item);
-
-    void on_listRequestValues_itemClicked(QListWidgetItem *item);
-
-    void on_fontComboBox_currentTextChanged(const QString &arg1);
-
-    void on_startTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_endTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_screenshotBtn_clicked();
-
-    void on_downloadButton_clicked();
-
     QStringList getCheckedItems(QListWidget* listWidget);
 
     void roundMinutes(QDateTimeEdit *dateTimeEdit);
@@ -49,6 +35,8 @@ private slots:
     QColor getColor(int pos);
 
     void paintItem(QListWidget* listWidget, QString itemValue, QColor paintColor);
+
+    void updateMaxTime();
 
     //void createBarPlot(std::unordered_map<)
 
